@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TestException.class)
     public ResponseEntity<Object> handleTestException(TestException ex) {
-        return new ResponseEntity<>("Proba " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Exception " + ex.getMessage(), HttpStatus.BAD_REQUEST);
 
     }
 
