@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.returnsbasicinfoforroom;
+package com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;

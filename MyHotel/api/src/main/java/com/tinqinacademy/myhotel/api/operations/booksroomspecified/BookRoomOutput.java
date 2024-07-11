@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.booksroomspecified;
+package com.tinqinacademy.myhotel.api.operations.booksroomspecified;
 
 import lombok.*;
 

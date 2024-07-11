@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.isroomavailable;
+package com.tinqinacademy.myhotel.api.operations.isroomavailable;
 
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.updatescertainroomsbyadmin;
+package com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin;
 
 import lombok.*;
 

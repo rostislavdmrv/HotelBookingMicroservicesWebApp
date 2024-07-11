@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.createsnewroomsbyadmin;
+package com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin;
 
 import jakarta.validation.constraints.*;
 import lombok.*;

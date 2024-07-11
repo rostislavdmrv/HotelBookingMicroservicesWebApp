@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.retrivessroomrenteroccupancies;
+package com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies;
 
 import jakarta.validation.constraints.*;
 import lombok.*;

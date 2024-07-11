@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.removesroomreservation;
+package com.tinqinacademy.myhotel.api.operations.removesroomreservation;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
