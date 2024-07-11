@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.booksroomspecified;
+package com.tinqinacademy.myhotel.api.operations.booksroomspecified;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;

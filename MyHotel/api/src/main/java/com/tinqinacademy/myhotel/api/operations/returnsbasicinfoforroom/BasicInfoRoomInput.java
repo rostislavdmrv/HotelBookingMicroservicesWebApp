@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.returnsbasicinfoforroom;
+package com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;

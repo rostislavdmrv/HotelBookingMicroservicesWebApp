@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.models.operations.registersvisitors;
+package com.tinqinacademy.myhotel.api.operations.registersvisitors;
 
 import lombok.*;
 
