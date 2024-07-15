@@ -13,6 +13,7 @@ import java.util.List;
 @Component
 public class ErrorServiceImpl  implements ErrorService {
 
+    @Override
     public ErrorWrapper errorHandler(MethodArgumentNotValidException ex) {
         List<ErrorsResponse> errors = new ArrayList<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
