@@ -76,6 +76,7 @@ public class RoomController {
     })
     @GetMapping("/{roomId}")
     public ResponseEntity<BasicInfoRoomOutput> infoForRoom(@PathVariable String roomId) {
+
         BasicInfoRoomInput inputId = BasicInfoRoomInput.builder().roomId(roomId).build();
 
         BasicInfoRoomOutput result = roomService.getInfoForRoom(inputId);
