@@ -57,20 +57,18 @@ public class SystemServiceImpl implements SystemService {
     }
 
     @Override
-    public UpdateRoomOutput updateAlreadyExistRoom(String roomId,UpdateRoomInput input) {
+    public UpdateRoomOutput updateAlreadyExistRoom(UpdateRoomInput input) {
         log.info("Starts updating existing room {}", input);
-        UpdateRoomOutput output = UpdateRoomOutput.builder().roomId(roomId).build();
+        UpdateRoomOutput output = UpdateRoomOutput.builder().roomId(input.getRoomId()).build();
         log.info("End : Successfully updating existing room with ID {}", output);
         return output;
     }
 
     @Override
-    public PartialUpdateRoomOutput partialUpdateRoom(String roomId,PartialUpdateRoomInput input) {
+    public PartialUpdateRoomOutput partialUpdateRoom(PartialUpdateRoomInput input) {
 
-
-        log.info("Starts partially updating room with ID '{}'and details {}", roomId, input);
-        PartialUpdateRoomOutput output = PartialUpdateRoomOutput.builder().roomId(roomId).build();
-
+        log.info("Starts partially updating room with ID '{}'and details {}",  input.getRoomId(), input);
+        PartialUpdateRoomOutput output = PartialUpdateRoomOutput.builder().roomId(input.getRoomId()).build();
         log.info("End : Successfully partially updating room with ID {}", output);
         return output;
     }

@@ -21,9 +21,9 @@ public interface SystemService {
 
     CreateRoomOutput createNewRoom(CreateRoomInput input);
 
-    UpdateRoomOutput updateAlreadyExistRoom(String roomId,UpdateRoomInput input);
+    UpdateRoomOutput updateAlreadyExistRoom(UpdateRoomInput input);
 
-    PartialUpdateRoomOutput partialUpdateRoom(String roomId, PartialUpdateRoomInput input);
+    PartialUpdateRoomOutput partialUpdateRoom(PartialUpdateRoomInput input);
 
     DeleteRoomOutput deleteRooms(DeleteRoomInput input);
 }
