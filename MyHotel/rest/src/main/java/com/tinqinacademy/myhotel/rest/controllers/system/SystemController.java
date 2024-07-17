@@ -119,7 +119,8 @@ public class SystemController {
     public ResponseEntity<UpdateRoomOutput> updateAlreadyCreatedRoomInSystem(@PathVariable("roomId") String roomId, @Valid @RequestBody UpdateRoomInput input) {
 
 
-        UpdateRoomOutput result = systemService.updateAlreadyExistRoom(roomId,input);
+        UpdateRoomInput updated = input.toBuilder().roomId(roomId).build();
+        UpdateRoomOutput result = systemService.updateAlreadyExistRoom(updated);
         return new ResponseEntity<>(result, HttpStatus.OK);
 
     }
@@ -135,7 +136,8 @@ public class SystemController {
     @PatchMapping("/room/{roomId}")
     public ResponseEntity<PartialUpdateRoomOutput> updateRoomPartially(@PathVariable("roomId") String roomId, @Valid @RequestBody PartialUpdateRoomInput input) {
 
-        PartialUpdateRoomOutput result = systemService.partialUpdateRoom(roomId,input);
+        PartialUpdateRoomInput updated = input.toBuilder().roomId(roomId).build();
+        PartialUpdateRoomOutput result = systemService.partialUpdateRoom(updated);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

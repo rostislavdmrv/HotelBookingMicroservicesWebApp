@@ -1,5 +1,7 @@
 package com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -10,12 +12,12 @@ import java.math.BigDecimal;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class UpdateRoomInput {
 
-    @NotNull(message = "Bed count cannot be null")
-    @Positive(message = "Bed count must be positive")
-    private Integer bedCount;
+    @NotBlank(message = "Room ID cannot be blank")
+    @JsonIgnore
+    private String roomId;
 
     @NotBlank(message = "Bed size cannot be blank")
     @Size(min = 5, max = 30, message = "Bed size cannot exceed 30 characters")
