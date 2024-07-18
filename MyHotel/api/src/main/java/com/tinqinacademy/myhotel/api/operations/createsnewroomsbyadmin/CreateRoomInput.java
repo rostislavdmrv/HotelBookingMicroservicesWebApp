@@ -1,6 +1,6 @@
 package com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin;
 
-import com.tinqinacademy.myhotel.api.enums.Bed;
+
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -17,7 +17,7 @@ public class CreateRoomInput {
 
     @NotBlank(message = "Bed size cannot be blank")
     @Size(min = 5, max = 30, message = "Bed size cannot exceed 30 characters")
-    private Bed bed;
+
     private String bedSize;
 
     @NotBlank(message = "Bathroom type cannot be blank")
