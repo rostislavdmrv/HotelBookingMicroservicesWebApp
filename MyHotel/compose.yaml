@@ -23,7 +23,7 @@ services:
     environment:
       POSTGRES_PASSWORD: rostislav11
       POSTGRES_USER: rostislav
-      POSTGRES_DB: comments-manager
+      POSTGRES_DB: hotel-manager
     volumes:
       - db-data:/var/lib/postresql/data
     networks:

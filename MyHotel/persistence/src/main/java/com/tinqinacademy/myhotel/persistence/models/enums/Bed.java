@@ -1,22 +1,26 @@
-package com.tinqinacademy.myhotel.api.enums;
+package com.tinqinacademy.myhotel.persistence.models.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Bed {
-    SINGLE("single"),
-    SMALL_DOUBLE("smallDouble"),
-    DOUBLE("double"),
-    QUEEN_SIZE("queenSize"),
-    KING_SIZE("kingSize"),
-    UNKNOWN("");
-
-
+    SINGLE("single", 1),
+    SMALL_DOUBLE("smallDouble", 2),
+    DOUBLE("double", 2),
+    KING_SIZE("kingSize", 3),
+    QUEEN_SIZE("queensSize", 3),
+    UNKNOWN("", 0);
 
     private final String code;
+    private final Integer capacity;
 
-    Bed(String code) {
+    Bed(String code, Integer capacity) {
         this.code = code;
+        this.capacity = capacity;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
     }
 
     public String getCode() {
