@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @Builder(toBuilder = true)
 public class UpdateRoomInput {
 
-    @NotBlank(message = "Room ID cannot be blank")
+    
     @JsonIgnore
     private String roomId;
 

@@ -10,7 +10,11 @@ import com.tinqinacademy.myhotel.api.operations.isroomavailable.RoomOutput;
 import com.tinqinacademy.myhotel.api.operations.isroomavailable.RoomInput;
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomInput;
 
+import com.tinqinacademy.myhotel.persistence.models.entities.Reservation;
+import com.tinqinacademy.myhotel.persistence.models.entities.Room;
+import com.tinqinacademy.myhotel.persistence.repositories.CreateRoomByAdminRepository;
 import com.tinqinacademy.myhotel.persistence.repositories.HotelRepository;
+import com.tinqinacademy.myhotel.persistence.repositories.ReservationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +22,20 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
 public class RoomServiceImpl implements RoomService {
 
     private final HotelRepository hotelRepository;
+    private final ReservationRepository reservationRepository;
+    private final CreateRoomByAdminRepository createRoomByAdminRepository;
 
-    public RoomServiceImpl(HotelRepository hotelRepository) {
+    public RoomServiceImpl(HotelRepository hotelRepository, ReservationRepository reservationRepository, CreateRoomByAdminRepository createRoomByAdminRepository) {
         this.hotelRepository = hotelRepository;
+        this.reservationRepository = reservationRepository;
+        this.createRoomByAdminRepository = createRoomByAdminRepository;
     }
 
     public RoomOutput getAvailableRooms(RoomInput input) {
@@ -84,15 +93,40 @@ public class RoomServiceImpl implements RoomService {
     public BookRoomOutput bookRoom(BookRoomInput input) {
         log.info("Stars booking room with ID: {} for dates {} to {}", input.getRoomId(), input.getStartDate(), input.getEndDate());
         // just empty object
+
+        Room room = createRoomByAdminRepository.findById(UUID.fromString(input.getRoomId()))
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        // Calculate total price based on room price per day
+        BigDecimal totalPrice = calculateTotalPrice(input.getStartDate(), input.getEndDate(), room.getPrice());
+
+        // Create a new reservation using Builder Pattern
+        Reservation reservation = Reservation.builder()
+                .id(UUID.randomUUID())
+                .roomId(UUID.fromString(input.getRoomId()))
+                .userId(UUID.randomUUID()) // Placeholder for actual user ID
+                .startDate(input.getStartDate())
+                .endDate(input.getEndDate())
+                .totalPrice(totalPrice)
+                .build();
+
+        reservationRepository.save(reservation);
+
         BookRoomOutput output = BookRoomOutput.builder().build();
 
         log.info("End: Room with ID {} successfully booked for dates {} to {}", input.getRoomId(), input.getStartDate(), input.getEndDate());
         return output;
     }
+    private BigDecimal calculateTotalPrice(LocalDate startDate, LocalDate endDate, BigDecimal pricePerDay) {
+        long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
+        return pricePerDay.multiply(BigDecimal.valueOf(daysBetween));
+    }
 
     @Override
     public RoomForRemoveOutput removeBookedRoom(RoomForRemoveInput id) {
         log.info("Starts attempting to cancel reservation for room with ID: {} ", id.getRoomId());
+
+
 
         RoomForRemoveOutput output = RoomForRemoveOutput.builder().build();
         log.info("End: Reservation for room with ID: {} successfully cancelled!", id.getRoomId());

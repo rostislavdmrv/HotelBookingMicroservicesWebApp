@@ -54,5 +54,5 @@ public class RoomRenterOccupancyInput {
 
     @NotBlank(message = "Room number cannot be blank")
     @Size(min = 1, max = 10, message = "Room number cannot exceed 10 characters" )
-    private Integer roomNo;
+    private String roomNo;
 }

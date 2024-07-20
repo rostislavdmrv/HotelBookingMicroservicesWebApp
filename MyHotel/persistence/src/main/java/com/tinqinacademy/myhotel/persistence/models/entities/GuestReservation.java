@@ -1,5 +1,6 @@
 package com.tinqinacademy.myhotel.persistence.models.entities;
 
+import com.tinqinacademy.myhotel.persistence.repositories.Entity;
 import lombok.*;
 
 import java.util.UUID;
@@ -10,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class GuestReservation {
+public class GuestReservation  implements Entity {
     private UUID reservationId;
     private UUID guestId;
 }
