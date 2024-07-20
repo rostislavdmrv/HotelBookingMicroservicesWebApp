@@ -70,7 +70,7 @@ public class SystemController {
              @RequestParam LocalDate idCardValidity,
              @RequestParam String idCardIssueAuthority,
              @RequestParam LocalDate idCardIssueDate,
-             @RequestParam Integer roomNo) {
+             @RequestParam String roomNo) {
 
         RoomRenterOccupancyInput input = RoomRenterOccupancyInput.builder()
                 .startDate(startDate)
@@ -116,7 +116,7 @@ public class SystemController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/room/{roomId}")
-    public ResponseEntity<UpdateRoomOutput> updateAlreadyCreatedRoomInSystem(@PathVariable("roomId") String roomId, @Valid @RequestBody UpdateRoomInput input) {
+    public ResponseEntity<UpdateRoomOutput> updateAlreadyCreatedRoomInSystem(@PathVariable("roomId") String roomId, @RequestBody @Valid UpdateRoomInput input) {
 
 
         UpdateRoomInput updated = input.toBuilder().roomId(roomId).build();
