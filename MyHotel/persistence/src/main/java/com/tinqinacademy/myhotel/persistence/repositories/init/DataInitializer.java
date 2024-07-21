@@ -17,6 +17,7 @@ import java.util.UUID;
 @Component
 @Order(1)
 public class DataInitializer implements ApplicationRunner {
+
     private final JdbcTemplate jdbcTemplate;
     private final BedRepository bedRepository;
 

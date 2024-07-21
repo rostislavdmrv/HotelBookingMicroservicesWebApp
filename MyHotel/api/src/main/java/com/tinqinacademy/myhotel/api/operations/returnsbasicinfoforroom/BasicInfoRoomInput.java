@@ -3,6 +3,8 @@ package com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @ToString
