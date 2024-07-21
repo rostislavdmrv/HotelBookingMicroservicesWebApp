@@ -3,8 +3,11 @@ package com.tinqinacademy.myhotel.persistence.repositories.impl;
 import com.tinqinacademy.myhotel.persistence.models.entities.Reservation;
 import com.tinqinacademy.myhotel.persistence.repositories.ReservationRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +16,21 @@ import java.util.UUID;
 public class ReservationRepositoryImpl implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
+
+
+    private final RowMapper<Reservation> reservationRowMapper = new RowMapper<>() {
+        @Override
+        public Reservation mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return Reservation.builder()
+                    .id(UUID.fromString(rs.getString("id")))
+                    .roomId(UUID.fromString(rs.getString("room_id")))
+                    .userId(UUID.fromString(rs.getString("user_id")))
+                    .startDate(rs.getDate("start_date").toLocalDate())
+                    .endDate(rs.getDate("end_date").toLocalDate())
+                    .totalPrice(rs.getBigDecimal("total_price"))
+                    .build();
+        }
+    };
 
     public ReservationRepositoryImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -29,16 +47,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     public Optional<Reservation> findById(UUID id) {
         String sql = "SELECT * FROM reservations WHERE id = ?";
         try {
-            Reservation reservation = jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) ->
-                    new Reservation(
-                            UUID.fromString(rs.getString("id")),
-                            UUID.fromString(rs.getString("room_id")),
-                            UUID.fromString(rs.getString("user_id")),
-                            rs.getDate("start_date").toLocalDate(),
-                            rs.getDate("end_date").toLocalDate(),
-                            rs.getBigDecimal("total_price")
-                    )
-            );
+            Reservation reservation = jdbcTemplate.queryForObject(sql, new Object[]{id}, reservationRowMapper);
             return Optional.ofNullable(reservation);
         } catch (Exception e) {
             return Optional.empty();
@@ -61,15 +70,12 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public List<Reservation> findAll() {
         String sql = "SELECT * FROM reservations";
-        return jdbcTemplate.query(sql, (rs, rowNum) ->
-                new Reservation(
-                        UUID.fromString(rs.getString("id")),
-                        UUID.fromString(rs.getString("room_id")),
-                        UUID.fromString(rs.getString("user_id")),
-                        rs.getDate("start_date").toLocalDate(),
-                        rs.getDate("end_date").toLocalDate(),
-                        rs.getBigDecimal("total_price")
-                )
-        );
+        return jdbcTemplate.query(sql, reservationRowMapper);
+    }
+
+    @Override
+    public List<Reservation> findByRoomId(UUID roomId) {
+        String sql = "SELECT * FROM reservations WHERE room_id = ?";
+        return jdbcTemplate.query(sql, reservationRowMapper, roomId);
     }
 }

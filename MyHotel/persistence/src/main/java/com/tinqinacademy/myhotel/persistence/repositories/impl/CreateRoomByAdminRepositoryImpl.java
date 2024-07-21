@@ -1,7 +1,9 @@
 package com.tinqinacademy.myhotel.persistence.repositories.impl;
 
+import com.tinqinacademy.myhotel.persistence.models.entities.Bed;
 import com.tinqinacademy.myhotel.persistence.models.entities.Room;
 import com.tinqinacademy.myhotel.persistence.models.enums.BathroomType;
+import com.tinqinacademy.myhotel.persistence.models.enums.BedSize;
 import com.tinqinacademy.myhotel.persistence.repositories.CreateRoomByAdminRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -45,7 +47,22 @@ public class CreateRoomByAdminRepositoryImpl implements CreateRoomByAdminReposit
     public Optional<Room> findById(UUID id) {
         String sql = "SELECT * FROM rooms WHERE id = ?";
         List<Room> rooms = jdbcTemplate.query(sql, roomRowMapper, id);
-        return rooms.isEmpty() ? Optional.empty() : Optional.of(rooms.get(0));
+        if (rooms.isEmpty()) {
+            return Optional.empty();
+        } else {
+            Room room = rooms.get(0);
+            room.setBeds(fetchBedsForRoom(room.getId()));
+            return Optional.of(room);
+        }
+    }
+
+    private List<Bed> fetchBedsForRoom(UUID roomId) {
+        String sql = "SELECT * FROM beds WHERE room_id = ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> Bed.builder()
+                .id(UUID.fromString(rs.getString("id")))
+                .capacity(rs.getInt("capacity"))
+                .bedSize(BedSize.getFromCode(rs.getString("bed")))
+                .build(), roomId);
     }
 
     @Override

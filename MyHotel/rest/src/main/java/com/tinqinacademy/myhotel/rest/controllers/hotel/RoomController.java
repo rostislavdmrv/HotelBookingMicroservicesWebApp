@@ -10,6 +10,7 @@ import com.tinqinacademy.myhotel.api.operations.removesroomreservation.RoomForRe
 import com.tinqinacademy.myhotel.api.operations.removesroomreservation.RoomForRemoveOutput;
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomInput;
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomOutput;
+import com.tinqinacademy.myhotel.rest.restapiroutes.RestApiRoutes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,7 +23,7 @@ import java.time.LocalDate;
 
 
 @RestController
-@RequestMapping("/hotel")
+
 public class RoomController {
 
     private final RoomService roomService;
@@ -41,7 +42,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Room not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/rooms")
+    @GetMapping(RestApiRoutes.CHECK_AVAILABILITY)
     public ResponseEntity<RoomOutput> isRoomAvailable(
              @RequestParam LocalDate start,
              @RequestParam LocalDate end,
@@ -73,7 +74,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Room not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/{roomId}")
+    @GetMapping(RestApiRoutes.RETRIEVE_BASIC_INFO)
     public ResponseEntity<BasicInfoRoomOutput> infoForRoom(@PathVariable String roomId) {
 
         BasicInfoRoomInput inputId = BasicInfoRoomInput.builder().roomId(roomId).build();
@@ -92,7 +93,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Room not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/{roomId}")
+    @PostMapping(RestApiRoutes.BOOK_ROOM)
     public ResponseEntity<BookRoomOutput> bookRoom(@PathVariable String roomId , @Valid @RequestBody BookRoomInput input) {
 
         BookRoomInput updatedInput = input.toBuilder()
@@ -113,7 +114,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Reservation not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @DeleteMapping("/{bookingId}")
+    @DeleteMapping(RestApiRoutes.DELETE_RESERVATION)
     public ResponseEntity<RoomForRemoveOutput> removeBookedRoom(@PathVariable String bookingId) {
 
         RoomForRemoveInput roomForRemoveInput = RoomForRemoveInput.builder()

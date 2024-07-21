@@ -13,6 +13,7 @@ import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.Updat
 import com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin.PartialUpdateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin.PartialUpdateRoomOutput;
 import com.tinqinacademy.myhotel.api.interfaces.system.SystemService;
+import com.tinqinacademy.myhotel.rest.restapiroutes.RestApiRoutes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/system")
+
 public class SystemController {
 
     private  final SystemService systemService;
@@ -41,7 +42,7 @@ public class SystemController {
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to register a new renter"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/register")
+    @PostMapping(RestApiRoutes.REGISTER_NEW_GUEST)
     public ResponseEntity<RegisterVisitorOutput> registerVisitorAsRenter(@Valid @RequestBody RegisterVisitorInput input) {
 
 
@@ -59,7 +60,7 @@ public class SystemController {
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to access room occupancy"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/register")
+    @GetMapping(RestApiRoutes.RENTER_OCCUPANCIES)
     public ResponseEntity<RoomRenterOccupancyOutput> getRoomRentersOccupancies(
              @RequestParam LocalDate startDate,
              @RequestParam LocalDate endDate,
@@ -98,7 +99,7 @@ public class SystemController {
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to create this room"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/room")
+    @PostMapping(RestApiRoutes.CREATE_ROOM)
     public ResponseEntity<CreateRoomOutput> createNewRoomInSystem(@Valid @RequestBody CreateRoomInput input) {
 
 
@@ -115,7 +116,7 @@ public class SystemController {
             @ApiResponse(responseCode = "404", description = "Room not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/room/{roomId}")
+    @PutMapping(RestApiRoutes.UPDATE_ROOM)
     public ResponseEntity<UpdateRoomOutput> updateAlreadyCreatedRoomInSystem(@PathVariable("roomId") String roomId, @RequestBody @Valid UpdateRoomInput input) {
 
 
@@ -133,7 +134,7 @@ public class SystemController {
             @ApiResponse(responseCode = "404", description = "Room not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PatchMapping("/room/{roomId}")
+    @PatchMapping(RestApiRoutes.UPDATE_ROOM)
     public ResponseEntity<PartialUpdateRoomOutput> updateRoomPartially(@PathVariable("roomId") String roomId, @Valid @RequestBody PartialUpdateRoomInput input) {
 
         PartialUpdateRoomInput updated = input.toBuilder().roomId(roomId).build();
@@ -150,7 +151,7 @@ public class SystemController {
             @ApiResponse(responseCode = "404", description = "Room not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @DeleteMapping("/room/{roomId}")
+    @DeleteMapping(RestApiRoutes.REMOVE_ROOM)
     public ResponseEntity<DeleteRoomOutput> deleteRooms(@PathVariable String roomId) {
 
         DeleteRoomInput roomForDelete = DeleteRoomInput.builder()
