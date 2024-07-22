@@ -31,6 +31,14 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleException(Exception ex){
+        String response = ex.getMessage();
+        if (ex.getCause()!=null)
+            response+="\nCause: "+ex.getCause();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
 
 
 }

@@ -96,4 +96,12 @@ public class UserRepositoryImpl implements UserRepository {
             return Optional.of(users.get(0));
         }
     }
+
+    @Override
+    public Optional<UUID> findUserIdByPhoneNumber(String phoneNumber) {
+        String sql = "SELECT id FROM users WHERE phone_number = ?";
+
+
+        return null;
+    }
 }
