@@ -128,7 +128,7 @@ public class SystemServiceImpl implements SystemService {
                 .id(uuid)
                 .roomFloor(input.getFloor())
                 .roomNumber(input.getRoomNo())
-                .bathroomType(BathroomType.valueOf(input.getBathroomType()))
+                .bathroomType(BathroomType.getFromCode(input.getBathroomType()))
                 .price(input.getPrice())
                 .build();
 
@@ -152,7 +152,9 @@ public class SystemServiceImpl implements SystemService {
         room.setBathroomType(BathroomType.getFromCode(input.getBathroomType()));
         room.setPrice(input.getPrice());
 
-        createRoomByAdminRepository.save(room);
+        createRoomByAdminRepository.update(room);
+
+
 
         UpdateRoomOutput output = UpdateRoomOutput.builder().roomId(room.getId().toString()).build();
 

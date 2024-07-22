@@ -30,7 +30,7 @@ public class BedRepositoryImpl implements BedRepository {
         public Bed mapRow(ResultSet rs, int rowNum) throws SQLException {
             return Bed.builder()
                     .id(UUID.fromString(rs.getString("id")))
-                    .bedSize(BedSize.valueOf(rs.getString("bed")))
+                    .bedSize(BedSize.getFromCode(rs.getString("bed")))
                     .capacity(rs.getInt("capacity"))
                     .build();
         }
