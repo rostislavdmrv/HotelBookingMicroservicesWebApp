@@ -4,9 +4,9 @@ import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoo
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomInput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomOutput;
-import com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies.RoomRenterOccupancyInput;
+import com.tinqinacademy.myhotel.api.operations.retrivesreports.ReportInput;
 import com.tinqinacademy.myhotel.api.operations.registersvisitors.RegisterVisitorInput;
-import com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies.RoomRenterOccupancyOutput;
+import com.tinqinacademy.myhotel.api.operations.retrivesreports.ReportOutput;
 import com.tinqinacademy.myhotel.api.operations.registersvisitors.RegisterVisitorOutput;
 import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.UpdateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.UpdateRoomOutput;
@@ -17,7 +17,7 @@ public interface SystemService {
 
     RegisterVisitorOutput registerVisitorAsRenter(RegisterVisitorInput input);
 
-    RoomRenterOccupancyOutput getRoomRentersOccupancies(RoomRenterOccupancyInput input);
+    ReportOutput reportByCriteria(ReportInput input);
 
     CreateRoomOutput createNewRoom(CreateRoomInput input);
 

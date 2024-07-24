@@ -1,15 +1,16 @@
 package com.tinqinacademy.myhotel.core.services.system.impl;
 
+import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomInput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomOutput;
-import com.tinqinacademy.myhotel.api.operations.registersvisitors.VisitorInput;
-import com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies.RoomRenterOutput;
-import com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies.RoomRenterOccupancyInput;
+import com.tinqinacademy.myhotel.api.models.input.VisitorInput;
+import com.tinqinacademy.myhotel.api.operations.retrivesreports.ReportInput;
 import com.tinqinacademy.myhotel.api.operations.registersvisitors.RegisterVisitorInput;
-import com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies.RoomRenterOccupancyOutput;
+import com.tinqinacademy.myhotel.api.operations.retrivesreports.ReportOutput;
 import com.tinqinacademy.myhotel.api.operations.registersvisitors.RegisterVisitorOutput;
+import com.tinqinacademy.myhotel.api.models.output.VisitorReportOutput;
 import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.UpdateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.UpdateRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin.PartialUpdateRoomInput;
@@ -17,11 +18,12 @@ import com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin.Parti
 import com.tinqinacademy.myhotel.api.interfaces.system.SystemService;
 import com.tinqinacademy.myhotel.persistence.models.entities.Guest;
 import com.tinqinacademy.myhotel.persistence.models.entities.Room;
-import com.tinqinacademy.myhotel.persistence.models.entities.User;
 import com.tinqinacademy.myhotel.persistence.models.enums.BathroomType;
-import com.tinqinacademy.myhotel.persistence.repositories.CreateRoomByAdminRepository;
+import com.tinqinacademy.myhotel.persistence.models.enums.BedSize;
+import com.tinqinacademy.myhotel.persistence.repositories.RoomRepository;
 import com.tinqinacademy.myhotel.persistence.repositories.GuestRepository;
 import com.tinqinacademy.myhotel.persistence.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -32,31 +34,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SystemServiceImpl implements SystemService {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int PASSWORD_LENGTH = 6;
     private static final SecureRandom random = new SecureRandom();
 
-    private  final CreateRoomByAdminRepository createRoomByAdminRepository;
+    private  final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final GuestRepository guestRepository;
 
-    public SystemServiceImpl(CreateRoomByAdminRepository createRoomByAdminRepository, UserRepository userRepository, GuestRepository guestRepository) {
-        this.createRoomByAdminRepository = createRoomByAdminRepository;
-        this.userRepository = userRepository;
-        this.guestRepository = guestRepository;
-    }
 
     @Override
     public RegisterVisitorOutput registerVisitorAsRenter(RegisterVisitorInput input) {
         log.info("Starts registering visitor as new renter {}", input);
 
         List<Guest> savedGuests = new ArrayList<>();
-        List<User> savedUsers = new ArrayList<>();
+
 
         for (VisitorInput visitorInput : input.getVisitorInputs()) {
 
@@ -73,17 +72,7 @@ public class SystemServiceImpl implements SystemService {
             guestRepository.save(guest);
             savedGuests.add(guest);
 
-            User user = User.builder()
-                    .id(guest.getId())
-                    .firstName(guest.getFirstName())
-                    .lastName(guest.getLastName())
-                    .userPassword(generateTemporaryPassword())
-                    .email(guest.getFirstName().toLowerCase() + "." + guest.getLastName().toLowerCase() + "@example.com") // Генерирайте временен email
-                    .birthday(guest.getBirthday())
-                    .phoneNumber(visitorInput.getPhoneNo())
-                    .build();
-            userRepository.save(user);
-            savedUsers.add(user);
+
         }
 
 
@@ -113,26 +102,49 @@ public class SystemServiceImpl implements SystemService {
     }
 
     @Override
-    public RoomRenterOccupancyOutput getRoomRentersOccupancies(RoomRenterOccupancyInput input) {
+    public ReportOutput reportByCriteria(ReportInput input) {
         log.info("Starts getting room renters occupancy {}", input);
-        RoomRenterOccupancyOutput output = RoomRenterOccupancyOutput.builder().roomRenters((List<RoomRenterOutput>) input).build();
+        ReportOutput output = ReportOutput.builder().roomRenters((List<VisitorReportOutput>) input).build();
         log.info("End : Successfully getting room renters occupancy {}", input);
         return output;
     }
 
     @Override
     public CreateRoomOutput createNewRoom(CreateRoomInput input) {
-        UUID uuid = UUID.randomUUID();
+
         log.info("Starts creating new room {}", input);
+//        if (roomRepository.existsRoomNo(input.getRoomNo())) {
+//            throw new RoomNoAlreadyExistsException(input.getRoomNo());
+//        }
+
+        BathroomType bathroomType = BathroomType.getFromCode(input.getBathroomType());
+        if (bathroomType.equals(BathroomType.UNKNOWN)) {
+            throw new ResourceNotFoundException(input.getBathroomType());
+
+        }
+
+        // Проверка за валидност на размерите на леглата
+        List<BedSize> bedSizes = input.getBeds().stream()
+                .map(BedSize::getFromCode)
+                .peek(bedSize -> {
+                    if (bedSize.equals(BedSize.UNKNOWN)) {
+                        throw new ResourceNotFoundException(input.getBathroomType());
+                    }
+                })
+                .collect(Collectors.toList());
+
+
+        UUID uuid = UUID.randomUUID();
+
         Room room = Room.builder()
                 .id(uuid)
                 .roomFloor(input.getFloor())
                 .roomNumber(input.getRoomNo())
-                .bathroomType(BathroomType.getFromCode(input.getBathroomType()))
+                .bathroomType(bathroomType)
                 .price(input.getPrice())
                 .build();
 
-        createRoomByAdminRepository.save(room);
+        roomRepository.save(room);
 
         CreateRoomOutput output = CreateRoomOutput.builder().roomId(room.getId()).build();
         log.info("End : Successfully creating new room with ID {}", output);
@@ -144,17 +156,37 @@ public class SystemServiceImpl implements SystemService {
     @Override
     public UpdateRoomOutput updateAlreadyExistRoom(UpdateRoomInput input) {
         log.info("Starts updating existing room {}", input);
-        Room room = createRoomByAdminRepository.findById(UUID.fromString(input.getRoomId()))
-                .orElseThrow(() -> new RuntimeException("Room not found"));
 
-        room.setRoomFloor(input.getFloor());
-        room.setRoomNumber(input.getRoomNo());
-        room.setBathroomType(BathroomType.getFromCode(input.getBathroomType()));
-        room.setPrice(input.getPrice());
+        if (!roomRepository.existsById(input.getRoomId())) {
+            throw new ResourceNotFoundException(input.getRoomId().toString());
+        }
 
-        createRoomByAdminRepository.update(room);
+        BathroomType bathroomType = BathroomType.getFromCode(input.getBathroomType());
+        if (bathroomType.equals(BathroomType.UNKNOWN)) {
+            throw new ResourceNotFoundException(input.getBathroomType());
+
+        }
+
+        // Проверка за валидност на размерите на леглата
+        List<BedSize> bedSizes = input.getBeds().stream()
+                .map(BedSize::getFromCode)
+                .peek(bedSize -> {
+                    if (bedSize.equals(BedSize.UNKNOWN)) {
+                        throw new ResourceNotFoundException(input.getBathroomType());
+                    }
+                })
+                .collect(Collectors.toList());
+
+        Room room = Room.builder()
+                .id(input.getRoomId())
+                .beds(null)
+                .bathroomType(bathroomType)
+                .roomNumber(input.getRoomNo())
+                .price(input.getPrice())
+                .build();
 
 
+        //Room updatedRoom = roomRepository.update(room);
 
         UpdateRoomOutput output = UpdateRoomOutput.builder().roomId(room.getId().toString()).build();
 
@@ -166,7 +198,7 @@ public class SystemServiceImpl implements SystemService {
     public PartialUpdateRoomOutput partialUpdateRoom(PartialUpdateRoomInput input) {
 
         log.info("Starts partially updating room with ID '{}' and details {}", input.getRoomId(), input);
-        Room room = createRoomByAdminRepository.findById(UUID.fromString(input.getRoomId()))
+        Room room = roomRepository.findById(input.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
 
 
@@ -183,7 +215,7 @@ public class SystemServiceImpl implements SystemService {
             room.setPrice(input.getPrice());
         }
 
-        createRoomByAdminRepository.save(room);
+        roomRepository.save(room);
 
         PartialUpdateRoomOutput output = PartialUpdateRoomOutput.builder().roomId(room.getId().toString()).build();
         log.info("End: Successfully partially updated room with ID {}", output.getRoomId());
@@ -196,8 +228,12 @@ public class SystemServiceImpl implements SystemService {
     @Override
     public DeleteRoomOutput deleteRooms(DeleteRoomInput input) {
         log.info("Starts deleting rooms {}", input);
-        UUID roomId = UUID.fromString(input.getRoomId());
-        createRoomByAdminRepository.deleteById(roomId);
+
+        if (!roomRepository.existsById(input.getRoomId())) {
+            throw new ResourceNotFoundException(input.getRoomId().toString());
+        }
+        UUID roomId = input.getRoomId();
+        roomRepository.deleteById(roomId);
 
         DeleteRoomOutput output = DeleteRoomOutput.builder().build();
         log.info("End: Successfully deleted room with ID {}", roomId);

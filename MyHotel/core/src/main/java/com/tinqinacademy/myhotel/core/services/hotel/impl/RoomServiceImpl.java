@@ -1,10 +1,11 @@
 package com.tinqinacademy.myhotel.core.services.hotel.impl;
 
+import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
 import com.tinqinacademy.myhotel.api.interfaces.room.RoomService;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomInput;
-import com.tinqinacademy.myhotel.api.operations.removesroomreservation.RoomForRemoveOutput;
+import com.tinqinacademy.myhotel.api.operations.removesroomreservation.UnbookRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomOutput;
-import com.tinqinacademy.myhotel.api.operations.removesroomreservation.RoomForRemoveInput;
+import com.tinqinacademy.myhotel.api.operations.removesroomreservation.UnbookRoomInput;
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.isroomavailable.RoomOutput;
 import com.tinqinacademy.myhotel.api.operations.isroomavailable.RoomInput;
@@ -12,10 +13,12 @@ import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInf
 
 import com.tinqinacademy.myhotel.persistence.models.entities.Reservation;
 import com.tinqinacademy.myhotel.persistence.models.entities.Room;
-import com.tinqinacademy.myhotel.persistence.repositories.BedRepository;
-import com.tinqinacademy.myhotel.persistence.repositories.CreateRoomByAdminRepository;
-import com.tinqinacademy.myhotel.persistence.repositories.HotelRepository;
+import com.tinqinacademy.myhotel.persistence.models.enums.BathroomType;
+import com.tinqinacademy.myhotel.persistence.models.enums.BedSize;
+import com.tinqinacademy.myhotel.persistence.repositories.RoomRepository;
 import com.tinqinacademy.myhotel.persistence.repositories.ReservationRepository;
+import com.tinqinacademy.myhotel.persistence.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -25,39 +28,49 @@ import java.util.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
 
-    private final HotelRepository hotelRepository;
-    private final ReservationRepository reservationRepository;
-    private final CreateRoomByAdminRepository createRoomByAdminRepository;
-    private final BedRepository bedRepository;
 
-    public RoomServiceImpl(HotelRepository hotelRepository, ReservationRepository reservationRepository, CreateRoomByAdminRepository createRoomByAdminRepository, BedRepository bedRepository) {
-        this.hotelRepository = hotelRepository;
-        this.reservationRepository = reservationRepository;
-        this.createRoomByAdminRepository = createRoomByAdminRepository;
-        this.bedRepository = bedRepository;
-    }
+    private final ReservationRepository reservationRepository;
+    private final RoomRepository roomRepository;
+    private final UserRepository userRepository;
+
+
 
     public RoomOutput getAvailableRooms(RoomInput input) {
         log.info("Starts availability check for free room from {} to {}",input.getStartDate(),input.getEndDate());
-        List<String> availableRoomIds = new ArrayList<>();
 
-        List<RoomInput> allRooms = hotelRepository.getAllRooms();
+        BathroomType bathroomType = BathroomType.getFromCode(input.getBathroomType());
+        if (bathroomType.equals(BathroomType.UNKNOWN)) {
+            throw new ResourceNotFoundException(input.getBathroomType());
 
-        for (RoomInput room : allRooms) {
-            if (room.getBedCount().equals(input.getBedCount()) &&
-                    room.getBedSize().equals(input.getBedSize()) &&
-                    room.getBathroomType().equals(input.getBathroomType()) &&
-                    !isDateOverlap(room.getStartDate(), room.getEndDate(), input.getStartDate(), input.getEndDate())) {
-
-                availableRoomIds.add(room.getId());
-            }
         }
+        BedSize bedSize = BedSize.getFromCode(input.getBedSize());
+        if (bedSize.equals(BedSize.UNKNOWN)) {
+            throw new ResourceNotFoundException(input.getBedSize());
+
+        }
+
+        // Проверка за валидност на размерите на леглата
+//        List<BedType> bedSizes = input.getBedSize().stream()
+//                .map(BedType::getFromCode)
+//                .peek(bedSize -> {
+//                    if (bedSize.equals(BedType.UNKNOWN)) {
+//                        throw new ResourceNotFoundException(input.getBathroomType());
+//                    }
+//                })
+//                .collect(Collectors.toList());
+
+
+
+
+        List<UUID> availableRoomIds = reservationRepository.searchForAvailableRooms(input.getStartDate(),input.getEndDate(),input.getBathroomType(),input.getBedSize(),input.getBedCount());
+
 
         RoomOutput output =RoomOutput.builder()
                 .ids(availableRoomIds)
-                .build(); ;
+                .build();
         log.info("End: Check results: {}", output);
         return output;
         //return RoomOutput.builder().ids(List.of("1","2","3")).build();
@@ -73,7 +86,7 @@ public class RoomServiceImpl implements RoomService {
         log.info("Starts getting basic information for room with ID: {}", input.getRoomId());
 
 
-        Optional<Room> roomOptional = createRoomByAdminRepository.findById(UUID.fromString(input.getRoomId()));
+        Optional<Room> roomOptional = roomRepository.findById(input.getRoomId());
         if (roomOptional.isPresent()) {
             Room room = roomOptional.get();
 
@@ -137,9 +150,21 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public BookRoomOutput bookRoom(BookRoomInput input) {
         log.info("Stars booking room with ID: {} for dates {} to {}", input.getRoomId(), input.getStartDate(), input.getEndDate());
-        // just empty object
 
-        Room room = createRoomByAdminRepository.findById(UUID.fromString(input.getRoomId()))
+        if (!roomRepository.existsById(input.getRoomId())) {
+            throw new ResourceNotFoundException(input.getRoomId().toString());
+        }
+
+
+//        if(reservationRepository.existsByRoomIdAndBetwenStartAndEndDate(
+//                input.getRoomId(),
+//                input.getStartDate(),
+//                input.getEndDate())){
+//            throw new NotAvailableException("Room with id " + input.getRoomId() + " is not available");
+//        }
+
+
+        Room room = roomRepository.findById(input.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
 
         // Calculate total price based on room price per day
@@ -148,8 +173,8 @@ public class RoomServiceImpl implements RoomService {
         // Create a new reservation using Builder Pattern
         Reservation reservation = Reservation.builder()
                 .id(UUID.randomUUID())
-                .roomId(UUID.fromString(input.getRoomId()))
-                .userId(UUID.randomUUID()) // Placeholder for actual user ID
+                .roomId(input.getRoomId())
+                .userId(UUID.randomUUID())
                 .startDate(input.getStartDate())
                 .endDate(input.getEndDate())
                 .totalPrice(totalPrice)
@@ -168,26 +193,22 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public RoomForRemoveOutput removeBookedRoom(RoomForRemoveInput id) {
-        UUID roomId = UUID.fromString(id.getRoomId());
-        log.info("Starts attempting to cancel reservation for room with ID: {} ", roomId);
+    public UnbookRoomOutput removeBookedRoom(UnbookRoomInput id) {
 
+        log.info("Starts attempting to cancel reservation for room with ID: {} ",id.getRoomId());
 
-        // Find reservations by roomId
-        List<Reservation> reservations = reservationRepository.findByRoomId(roomId);
+        Optional<Reservation> reservationOptional =
+                reservationRepository.findById(id.getRoomId());
 
-        if (!reservations.isEmpty()) {
-            for (Reservation reservation : reservations) {
-                // Delete each reservation
-                reservationRepository.deleteById(reservation.getId());
-
-            }
-            log.info("End: Reservation for room with ID: {} successfully cancelled!", reservations.get(0).getRoomId());
-        } else {
-
-            log.info("No reservation found for room with ID: {}", reservations.get(0).getRoomId());
+        if(reservationOptional.isEmpty()){
+            throw new ResourceNotFoundException(id.getRoomId().toString());
         }
-        RoomForRemoveOutput output = RoomForRemoveOutput.builder().build();
+
+        reservationRepository.delete(reservationOptional.get());
+
+        log.info("End: Reservation for room with ID: {} successfully cancelled!", reservationOptional.get().getRoomId());
+        UnbookRoomOutput output = UnbookRoomOutput.builder().build();
+
 
         return output;
     }

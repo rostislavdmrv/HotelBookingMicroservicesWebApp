@@ -6,7 +6,6 @@ import lombok.*;
 @Setter
 @ToString
 @NoArgsConstructor
-//@AllArgsConstructor
 @Builder
 public class BookRoomOutput {
 

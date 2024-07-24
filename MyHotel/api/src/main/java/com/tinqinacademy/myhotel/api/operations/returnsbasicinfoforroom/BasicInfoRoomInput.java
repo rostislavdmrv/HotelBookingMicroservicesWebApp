@@ -14,5 +14,5 @@ import java.util.UUID;
 public class BasicInfoRoomInput {
 
     @NotBlank(message = "Room ID cannot be blank")
-    private String roomId;
+    private UUID roomId;
 }

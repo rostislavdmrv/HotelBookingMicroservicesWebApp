@@ -3,6 +3,7 @@ package com.tinqinacademy.myhotel.api.operations.isroomavailable;
 import lombok.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,7 +13,7 @@ import java.util.List;
 @Builder
 public class RoomOutput {
 
-    private List<String> ids;
+    private List<UUID> ids;
 
 
 }

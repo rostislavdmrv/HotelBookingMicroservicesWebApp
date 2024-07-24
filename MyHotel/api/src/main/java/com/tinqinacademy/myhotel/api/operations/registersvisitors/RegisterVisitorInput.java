@@ -1,5 +1,6 @@
 package com.tinqinacademy.myhotel.api.operations.registersvisitors;
 
+import com.tinqinacademy.myhotel.api.models.input.VisitorInput;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
