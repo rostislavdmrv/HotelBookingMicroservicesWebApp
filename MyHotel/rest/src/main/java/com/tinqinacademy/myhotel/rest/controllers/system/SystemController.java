@@ -4,9 +4,9 @@ import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoo
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomInput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomOutput;
-import com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies.RoomRenterOccupancyInput;
+import com.tinqinacademy.myhotel.api.operations.retrivesreports.ReportInput;
 import com.tinqinacademy.myhotel.api.operations.registersvisitors.RegisterVisitorInput;
-import com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies.RoomRenterOccupancyOutput;
+import com.tinqinacademy.myhotel.api.operations.retrivesreports.ReportOutput;
 import com.tinqinacademy.myhotel.api.operations.registersvisitors.RegisterVisitorOutput;
 import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.UpdateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.UpdateRoomOutput;
@@ -17,30 +17,30 @@ import com.tinqinacademy.myhotel.rest.restapiroutes.RestApiRoutes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @RestController
-
+@RequiredArgsConstructor
+@Tag(name = "System REST APIs")
 public class SystemController {
 
     private  final SystemService systemService;
-
-    public SystemController(SystemService systemService) {
-        this.systemService = systemService;
-    }
 
 
     @Operation(summary = "Registers a new renter ", description = "Registers a new renter in the system with specific details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully registered renter"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to register a new renter"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to register a new renter")
+
     })
     @PostMapping(RestApiRoutes.REGISTER_NEW_GUEST)
     public ResponseEntity<RegisterVisitorOutput> registerVisitorAsRenter(@Valid @RequestBody RegisterVisitorInput input) {
@@ -53,27 +53,27 @@ public class SystemController {
 
 
 
-    @Operation(summary = "Retrieves room renters occupancies", description = "Retrieves information about all visitors currently occupying the room.")
+    @Operation(summary = "Creates a report based on specified criteria", description = "Creates a detailed report by evaluating various criteria related to room occupancies and visitor information.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved room occupancy information"),
+            @ApiResponse(responseCode = "200", description = "Report successfully created"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to access room occupancy"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @GetMapping(RestApiRoutes.RENTER_OCCUPANCIES)
-    public ResponseEntity<RoomRenterOccupancyOutput> getRoomRentersOccupancies(
-             @RequestParam LocalDate startDate,
-             @RequestParam LocalDate endDate,
-             @RequestParam String firstName,
-             @RequestParam String lastName,
-             @RequestParam String phoneNo,
-             @RequestParam String idCardNo,
-             @RequestParam LocalDate idCardValidity,
-             @RequestParam String idCardIssueAuthority,
-             @RequestParam LocalDate idCardIssueDate,
-             @RequestParam String roomNo) {
+            @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to generate the report")
 
-        RoomRenterOccupancyInput input = RoomRenterOccupancyInput.builder()
+    })
+    @GetMapping(RestApiRoutes.REPORT_VISITORS)
+    public ResponseEntity<ReportOutput> getVisitorReports(
+             @RequestParam(required = false) LocalDate startDate,
+             @RequestParam(required = false) LocalDate endDate,
+             @RequestParam(required = false) String firstName,
+             @RequestParam(required = false) String lastName,
+             @RequestParam(required = false) String phoneNo,
+             @RequestParam(required = false) String idCardNo,
+             @RequestParam(required = false) LocalDate idCardValidity,
+             @RequestParam(required = false) String idCardIssueAuthority,
+             @RequestParam(required = false) LocalDate idCardIssueDate,
+             @RequestParam(required = false) String roomNo) {
+
+        ReportInput input = ReportInput.builder()
                 .startDate(startDate)
                 .endDate(endDate)
                 .firstName(firstName)
@@ -87,7 +87,7 @@ public class SystemController {
                 .build();
 
 
-        RoomRenterOccupancyOutput result = systemService.getRoomRentersOccupancies(input);
+        ReportOutput result = systemService.reportByCriteria(input);
         return new ResponseEntity<>(result, HttpStatus.OK);
 
     }
@@ -96,8 +96,7 @@ public class SystemController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully create a room"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to create this room"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to create this room")
     })
     @PostMapping(RestApiRoutes.CREATE_ROOM)
     public ResponseEntity<CreateRoomOutput> createNewRoomInSystem(@Valid @RequestBody CreateRoomInput input) {
@@ -113,11 +112,10 @@ public class SystemController {
             @ApiResponse(responseCode = "200", description = "Successfully updated the room"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to update this room"),
-            @ApiResponse(responseCode = "404", description = "Room not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @PutMapping(RestApiRoutes.UPDATE_ROOM)
-    public ResponseEntity<UpdateRoomOutput> updateAlreadyCreatedRoomInSystem(@PathVariable("roomId") String roomId, @RequestBody @Valid UpdateRoomInput input) {
+    public ResponseEntity<UpdateRoomOutput> updateAlreadyCreatedRoomInSystem(@PathVariable("roomId") UUID roomId, @RequestBody @Valid UpdateRoomInput input) {
 
 
         UpdateRoomInput updated = input.toBuilder().roomId(roomId).build();
@@ -131,11 +129,10 @@ public class SystemController {
             @ApiResponse(responseCode = "200", description = "Successfully partially updated the room"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to update this room"),
-            @ApiResponse(responseCode = "404", description = "Room not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "404", description = "Room not found")
     })
-    @PatchMapping(RestApiRoutes.UPDATE_ROOM)
-    public ResponseEntity<PartialUpdateRoomOutput> updateRoomPartially(@PathVariable("roomId") String roomId, @Valid @RequestBody PartialUpdateRoomInput input) {
+    @PatchMapping(RestApiRoutes.PART_UPDATE_ROOM)
+    public ResponseEntity<PartialUpdateRoomOutput> updateRoomPartially(@PathVariable("roomId") UUID roomId, @Valid @RequestBody PartialUpdateRoomInput input) {
 
         PartialUpdateRoomInput updated = input.toBuilder().roomId(roomId).build();
         PartialUpdateRoomOutput result = systemService.partialUpdateRoom(updated);
@@ -148,11 +145,10 @@ public class SystemController {
             @ApiResponse(responseCode = "200", description = "Room deleted successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to delete this reservation"),
-            @ApiResponse(responseCode = "404", description = "Room not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @DeleteMapping(RestApiRoutes.REMOVE_ROOM)
-    public ResponseEntity<DeleteRoomOutput> deleteRooms(@PathVariable String roomId) {
+    public ResponseEntity<DeleteRoomOutput> deleteRooms(@PathVariable UUID roomId) {
 
         DeleteRoomInput roomForDelete = DeleteRoomInput.builder()
                 .roomId(roomId)

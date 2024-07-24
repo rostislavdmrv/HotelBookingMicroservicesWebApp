@@ -8,6 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 //@AllArgsConstructor
 @Builder
-public class RoomForRemoveOutput {
+public class UnbookRoomOutput {
 
 }

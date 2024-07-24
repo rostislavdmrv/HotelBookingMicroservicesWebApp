@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.api.operations.retrivessroomrenteroccupancies;
+package com.tinqinacademy.myhotel.api.models.output;
 
 import lombok.*;
 
@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RoomRenterOutput {
+public class VisitorReportOutput {
     private LocalDate startDate;
     private LocalDate endDate;
     private String firstName;
