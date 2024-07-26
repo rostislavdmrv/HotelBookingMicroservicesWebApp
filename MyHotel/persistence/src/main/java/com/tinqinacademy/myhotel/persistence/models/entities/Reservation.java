@@ -3,9 +3,12 @@ package com.tinqinacademy.myhotel.persistence.models.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,14 +24,16 @@ import java.util.UUID;
 public class Reservation {
 
     @Id
-    @GeneratedValue(generator = "UUID")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "room_id", nullable = false, unique = true)
-    private UUID roomId;
+    @ManyToOne
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
 
-    @Column(name = "user_id", nullable = false, unique = true)
-    private UUID userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -39,7 +44,15 @@ public class Reservation {
     @Column(name = "total_price", nullable = false)
     private BigDecimal totalPrice;
 
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @ManyToMany(mappedBy = "reservations")
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+
+    @ManyToMany
     private Set<Guest> guests;
 }

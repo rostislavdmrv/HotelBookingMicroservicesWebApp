@@ -1,6 +1,8 @@
 package com.tinqinacademy.myhotel.core.services.hotel.impl;
 
+import com.tinqinacademy.myhotel.api.exceptions.NotAvailableException;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
+import com.tinqinacademy.myhotel.api.exceptions.UserNotFoundException;
 import com.tinqinacademy.myhotel.api.interfaces.room.RoomService;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomInput;
 import com.tinqinacademy.myhotel.api.operations.removesroomreservation.UnbookRoomOutput;
@@ -11,8 +13,10 @@ import com.tinqinacademy.myhotel.api.operations.isroomavailable.RoomOutput;
 import com.tinqinacademy.myhotel.api.operations.isroomavailable.RoomInput;
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomInput;
 
+import com.tinqinacademy.myhotel.persistence.models.entities.Bed;
 import com.tinqinacademy.myhotel.persistence.models.entities.Reservation;
 import com.tinqinacademy.myhotel.persistence.models.entities.Room;
+import com.tinqinacademy.myhotel.persistence.models.entities.User;
 import com.tinqinacademy.myhotel.persistence.models.enums.BathroomType;
 import com.tinqinacademy.myhotel.persistence.models.enums.BedSize;
 import com.tinqinacademy.myhotel.persistence.repositories.RoomRepository;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -51,6 +56,15 @@ public class RoomServiceImpl implements RoomService {
             throw new ResourceNotFoundException(input.getBedSize());
 
         }
+        List<Room> availableRooms = roomRepository.findAvailableRooms(input.getStartDate(), input.getEndDate());
+        List<Room> roomsMatchingCriteria = roomRepository.findRoomsByBedSizeAndBathroomType(bedSize, bathroomType);
+        List<UUID> availableRoomIds = new ArrayList<>();
+
+        for (Room room : availableRooms) {
+            if (roomsMatchingCriteria.contains(room)) {
+                availableRoomIds.add(room.getId());
+            }
+        }
 
         // Проверка за валидност на размерите на леглата
 //        List<BedType> bedSizes = input.getBedSize().stream()
@@ -65,7 +79,7 @@ public class RoomServiceImpl implements RoomService {
 
 
 
-        List<UUID> availableRoomIds = reservationRepository.searchForAvailableRooms(input.getStartDate(),input.getEndDate(),input.getBathroomType(),input.getBedSize(),input.getBedCount());
+
 
 
         RoomOutput output =RoomOutput.builder()
@@ -85,51 +99,39 @@ public class RoomServiceImpl implements RoomService {
     public BasicInfoRoomOutput getInfoForRoom(BasicInfoRoomInput input) {
         log.info("Starts getting basic information for room with ID: {}", input.getRoomId());
 
+        Room room = roomRepository.findByIdWithBeds(input.getRoomId()).orElseThrow(() -> new ResourceNotFoundException("Room not found"));
 
-        Optional<Room> roomOptional = roomRepository.findById(input.getRoomId());
-        if (roomOptional.isPresent()) {
-            Room room = roomOptional.get();
+        List<Reservation> reservations = reservationRepository.findAllByRoomId(room.getId()).orElse(new ArrayList<>());
 
-
-            List<Reservation> reservations = reservationRepository.findByRoomId(room.getId());
-
-            // Проверка дали стаята има поне една резервация
-            if (!reservations.isEmpty()) {
-                // Извлечете първата резервация (ако има само една)
-                Reservation reservation = reservations.get(0);
-
-                // Изчислете заетите дати за резервацията
-                List<LocalDate> occupiedDates = generateDateRange(reservation.getStartDate(), reservation.getEndDate());
-
-                // Създайте изходния обект
-                BasicInfoRoomOutput output = BasicInfoRoomOutput.builder()
-                        .roomId(room.getId().toString())
-                        .price(room.getPrice())
-                        .floor(room.getRoomFloor())
-                        .bedSize(room.getBeds().isEmpty() ? "N/A" : room.getBeds().get(0).getBedSize().toString())
-                        .bathroomType(room.getBathroomType().toString())
-                        .bedCount(room.getBeds().size())
-                        .datesOccupied(occupiedDates) // Списък на заетите дати
-                        .build();
-
-                log.info("End: Found room info: {}", output);
-                return output;
-            } else {
-                log.info("No reservations found for room with ID: {}", input.getRoomId());
-                return BasicInfoRoomOutput.builder()
-                        .roomId(room.getId().toString())
-                        .price(room.getPrice())
-                        .floor(room.getRoomFloor())
-                        .bedSize(room.getBeds().isEmpty() ? "N/A" : room.getBeds().get(0).getBedSize().toString())
-                        .bathroomType(room.getBathroomType().toString())
-                        .bedCount(room.getBeds().size())
-                        .datesOccupied(Collections.emptyList())
-                        .build();
+        List<LocalDate> datesOccupied = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            LocalDate startDate = reservation.getStartDate();
+            LocalDate endDate = reservation.getEndDate();
+            while (startDate.isBefore(endDate)) {
+                datesOccupied.add(startDate);
+                startDate = startDate.plusDays(1);
             }
-        } else {
-            log.info("Room with ID: {} not found", input.getRoomId());
-            return null;
         }
+
+        BasicInfoRoomOutput output = BasicInfoRoomOutput.builder()
+                .roomId(room.getId())
+                .price(room.getPrice())
+                .floor(room.getRoomFloor())
+                .bedSize(room.getBeds().stream()
+                        .map(Bed::getBedSize) // Получавате `BetSize` или `Enum` тип
+                        .map(bedSize -> bedSize.name()) // Преобразувате в низ, ако е `Enum`
+                        .collect(Collectors.toList()))
+                .bathroomType(room.getBathroomType().toString())
+                .bedCount(room.getBeds().size())
+                .datesOccupied(datesOccupied)
+                .build();
+
+
+
+        log.info("End: Found room info: {}", output);
+        return output;
+
+
     }
 
     private List<LocalDate> generateDateRange(LocalDate startDate, LocalDate endDate) {
@@ -154,33 +156,32 @@ public class RoomServiceImpl implements RoomService {
         if (!roomRepository.existsById(input.getRoomId())) {
             throw new ResourceNotFoundException(input.getRoomId().toString());
         }
+        Room room = roomRepository.findByIdWithBeds(input.getRoomId()).orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+
+        List<Room> availableRooms = roomRepository.findAvailableRooms(input.getStartDate(), input.getEndDate());
+
+        if (!availableRooms.contains(room)) {
+            throw new NotAvailableException("Room is not available for the selected dates");
+        }
+
+        User user = userRepository
+                .findByPhoneNumberAndFirstNameAndLastName(input.getPhoneNo(), input.getFirstName(), input.getLastName())
+                .orElseThrow(() -> new UserNotFoundException("no user found"));
 
 
-//        if(reservationRepository.existsByRoomIdAndBetwenStartAndEndDate(
-//                input.getRoomId(),
-//                input.getStartDate(),
-//                input.getEndDate())){
-//            throw new NotAvailableException("Room with id " + input.getRoomId() + " is not available");
-//        }
-
-
-        Room room = roomRepository.findById(input.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Room not found"));
-
-        // Calculate total price based on room price per day
         BigDecimal totalPrice = calculateTotalPrice(input.getStartDate(), input.getEndDate(), room.getPrice());
 
-        // Create a new reservation using Builder Pattern
         Reservation reservation = Reservation.builder()
-                .id(UUID.randomUUID())
-                .roomId(input.getRoomId())
-                .userId(UUID.randomUUID())
+                .room(room)
+                .user(user)
                 .startDate(input.getStartDate())
                 .endDate(input.getEndDate())
                 .totalPrice(totalPrice)
+                .guests(Set.of()) // Empty set, later will have endpoint for adding guests for certain reservation
                 .build();
 
         reservationRepository.save(reservation);
+
 
         BookRoomOutput output = BookRoomOutput.builder().build();
 
@@ -206,7 +207,7 @@ public class RoomServiceImpl implements RoomService {
 
         reservationRepository.delete(reservationOptional.get());
 
-        log.info("End: Reservation for room with ID: {} successfully cancelled!", reservationOptional.get().getRoomId());
+        log.info("End: Reservation for room with ID: {} successfully cancelled!", reservationOptional.get());
         UnbookRoomOutput output = UnbookRoomOutput.builder().build();
 
 

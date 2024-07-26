@@ -18,14 +18,12 @@ import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
-@Component
-@Order(1)
 public class DataInitializer implements ApplicationRunner {
 
     private final JdbcTemplate jdbcTemplate;
     private final BedRepository bedRepository;
 
-    @Autowired
+
     public DataInitializer(JdbcTemplate jdbcTemplate, BedRepository bedRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.bedRepository = bedRepository;

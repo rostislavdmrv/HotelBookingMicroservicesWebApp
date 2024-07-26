@@ -23,9 +23,7 @@ public class UpdateRoomInput {
     @JsonIgnore
     private UUID roomId;
 
-    @Valid
-    @Schema(example = "single")
-    @NotBlank(message = "Bed size cannot be blank")
+
     private List<String> beds;
 
     @Schema(example = "private")
