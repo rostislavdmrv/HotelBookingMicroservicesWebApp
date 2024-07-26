@@ -31,7 +31,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .userPassword(input.getPassword())
                 .firstName(input.getFirstName())
                 .lastName(input.getLastName())
-                .birthday(generateRandomBirthday())
+                .birthdate(generateRandomBirthday())
                 .phoneNumber(input.getPhoneNo())
                 .id(UUID.randomUUID())
                 .build();

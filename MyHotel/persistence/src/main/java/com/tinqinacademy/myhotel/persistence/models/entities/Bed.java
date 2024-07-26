@@ -3,7 +3,10 @@ package com.tinqinacademy.myhotel.persistence.models.entities;
 import com.tinqinacademy.myhotel.persistence.models.enums.BedSize;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,7 +22,7 @@ import java.util.UUID;
 public class Bed   {
 
     @Id
-    @GeneratedValue(generator = "UUID")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Enumerated(EnumType.STRING)
@@ -29,6 +32,13 @@ public class Bed   {
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
-    @ManyToMany(mappedBy = "beds")
-    private Set<Room> rooms;
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+
 }

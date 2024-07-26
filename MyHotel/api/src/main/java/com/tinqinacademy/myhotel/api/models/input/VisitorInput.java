@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -62,5 +63,9 @@ public class VisitorInput {
     @NotNull(message = "ID card issue date cannot be null")
     @PastOrPresent(message = "ID card issue date must be in the past or present")
     private LocalDate idCardIssueDate;
+
+    private UUID roomId;
+
+    private LocalDate birthdate;
 
 }

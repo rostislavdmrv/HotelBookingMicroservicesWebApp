@@ -3,7 +3,7 @@ package com.tinqinacademy.myhotel.api.models.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum BedType {
+public enum BedSize {
     SINGLE("single", 1),
     SMALL_DOUBLE("smallDouble", 2),
     DOUBLE("double", 2),
@@ -14,7 +14,7 @@ public enum BedType {
     private final String code;
     private final Integer capacity;
 
-    BedType(String code, Integer capacity) {
+    BedSize(String code, Integer capacity) {
         this.code = code;
         this.capacity = capacity;
     }
@@ -28,14 +28,14 @@ public enum BedType {
     }
 
     @JsonCreator
-    public static BedType getFromCode(String code) {
-        for (BedType size : BedType.values()) {
+    public static BedSize getFromCode(String code) {
+        for (BedSize size : BedSize.values()) {
             if(size.getCode().equals(code)) {
                 return size;
 
             }
         }
-        return BedType.UNKNOWN;
+        return BedSize.UNKNOWN;
     }
 
     @Override

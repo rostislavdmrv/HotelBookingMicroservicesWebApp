@@ -3,8 +3,11 @@ package com.tinqinacademy.myhotel.persistence.models.entities;
 import com.tinqinacademy.myhotel.persistence.models.enums.BathroomType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +22,7 @@ import java.util.UUID;
 @Table(name = "rooms")
 public class Room {
     @Id
-    @GeneratedValue(generator = "UUID")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "room_floor", nullable = false)
@@ -32,14 +35,18 @@ public class Room {
     @Column(name = "bathroom_type", nullable = false)
     private BathroomType bathroomType;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = false,precision = 10, scale = 2)
     private BigDecimal price;
 
-    @ManyToMany
-    @JoinTable(
-            name = "room_bed",
-            joinColumns = @JoinColumn(name = "room_id" ,referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "bed_id",referencedColumnName = "id")
-    )
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "room_bed")
     private List<Bed> beds;
 }
