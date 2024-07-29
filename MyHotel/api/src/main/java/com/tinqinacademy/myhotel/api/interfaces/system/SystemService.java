@@ -1,5 +1,6 @@
 package com.tinqinacademy.myhotel.api.interfaces.system;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomInput;
@@ -12,7 +13,11 @@ import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.Updat
 import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.UpdateRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin.PartialUpdateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin.PartialUpdateRoomOutput;
+import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
+@Service
 public interface SystemService {
 
     RegisterVisitorOutput registerVisitorAsRenter(RegisterVisitorInput input);

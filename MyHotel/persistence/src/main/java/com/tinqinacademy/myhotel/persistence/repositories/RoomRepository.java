@@ -32,7 +32,7 @@ public interface RoomRepository extends JpaRepository<Room, UUID> {
                  AND res.end_date >= :startDate
             WHERE res.room_id IS NULL;
             """, nativeQuery = true)
-    List<Room> findAvailableRooms(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    Optional<List<Room>> findAvailableRooms(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("""
             SELECT r FROM Room r LEFT JOIN FETCH r.beds WHERE r.id = :roomId
@@ -40,13 +40,10 @@ public interface RoomRepository extends JpaRepository<Room, UUID> {
     Optional<Room> findByIdWithBeds(@Param("roomId") UUID roomId);
 
 
-    boolean existsRoomByRoomNumber(String roomNo);
+    Boolean existsRoomByRoomNumber(String roomNo);
 
 
     Optional<Room> findByRoomNumber(String roomNumber);
-
-
-
 
 
 
@@ -55,9 +52,6 @@ public interface RoomRepository extends JpaRepository<Room, UUID> {
            SELECT COUNT(r) FROM Room r WHERE r.roomNumber = ?1 
            """)
     boolean existsRoomNo(String roomNo);
-    //Room update(Room entity);
-
-
 
     public long count();
     public void deleteAll();

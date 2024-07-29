@@ -8,10 +8,12 @@ import com.tinqinacademy.myhotel.persistence.models.entities.User;
 import com.tinqinacademy.myhotel.persistence.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -21,21 +23,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private  final UserRepository userRepository;
+    private final ConversionService conversionService;
     @Override
     public SignUpOutput signUp(SignUpInput input) {
         log.info("Start signUp: {}", input);
 
-        // Създаване на User обект чрез Builder
-        User user = User.builder()
-                .email(input.getEmail())
-                .userPassword(input.getPassword())
-                .firstName(input.getFirstName())
-                .lastName(input.getLastName())
-                .birthdate(generateRandomBirthday())
-                .phoneNumber(input.getPhoneNo())
-                .id(UUID.randomUUID())
-                .build();
-
+        User user = Objects.requireNonNull(conversionService.convert(input, User.UserBuilder.class))
+                .birthdate(generateRandomBirthday()).id(UUID.randomUUID()).build();
 
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailAlreadyExistsException();
@@ -46,7 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
         SignUpOutput output = SignUpOutput.builder()
-                .id(user.getId())
+                .id(user.getId().toString())
                 .build();
 
         log.info("End signUp: {}", output);

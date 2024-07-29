@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 public class RoomOutput {
 
-    private List<UUID> ids;
+    private List<String> ids;
 
 
 }

@@ -64,7 +64,7 @@ public class VisitorInput {
     @PastOrPresent(message = "ID card issue date must be in the past or present")
     private LocalDate idCardIssueDate;
 
-    private UUID roomId;
+    private String roomId;
 
     private LocalDate birthdate;
 

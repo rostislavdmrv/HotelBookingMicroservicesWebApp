@@ -11,5 +11,5 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class SignUpOutput {
-    private UUID id;
+    private String id;
 }

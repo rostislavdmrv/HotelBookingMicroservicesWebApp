@@ -115,7 +115,7 @@ public class SystemController {
             @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @PutMapping(RestApiRoutes.UPDATE_ROOM)
-    public ResponseEntity<UpdateRoomOutput> updateAlreadyCreatedRoomInSystem(@PathVariable("roomId") UUID roomId, @RequestBody @Valid UpdateRoomInput input) {
+    public ResponseEntity<UpdateRoomOutput> updateAlreadyCreatedRoomInSystem(@PathVariable("roomId") String roomId, @RequestBody @Valid UpdateRoomInput input) {
 
 
         UpdateRoomInput updated = input.toBuilder().roomId(roomId).build();
@@ -132,7 +132,7 @@ public class SystemController {
             @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @PatchMapping(RestApiRoutes.PART_UPDATE_ROOM)
-    public ResponseEntity<PartialUpdateRoomOutput> updateRoomPartially(@PathVariable("roomId") UUID roomId, @Valid @RequestBody PartialUpdateRoomInput input) {
+    public ResponseEntity<PartialUpdateRoomOutput> updateRoomPartially(@PathVariable("roomId") String roomId, @Valid @RequestBody PartialUpdateRoomInput input) {
 
         PartialUpdateRoomInput updated = input.toBuilder().roomId(roomId).build();
         PartialUpdateRoomOutput result = systemService.partialUpdateRoom(updated);
@@ -148,7 +148,7 @@ public class SystemController {
             @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @DeleteMapping(RestApiRoutes.REMOVE_ROOM)
-    public ResponseEntity<DeleteRoomOutput> deleteRooms(@PathVariable UUID roomId) {
+    public ResponseEntity<DeleteRoomOutput> deleteRooms(@PathVariable String roomId) {
 
         DeleteRoomInput roomForDelete = DeleteRoomInput.builder()
                 .roomId(roomId)

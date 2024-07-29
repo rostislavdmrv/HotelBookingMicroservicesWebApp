@@ -15,7 +15,7 @@ import java.util.UUID;
 public class RoomInput {
 
     @NotBlank(message = "ID cannot be blank")
-    private UUID id;
+    private String id;
 
     @Schema(example = "2024-08-01")
     @NotNull(message = "Start date cannot be null")

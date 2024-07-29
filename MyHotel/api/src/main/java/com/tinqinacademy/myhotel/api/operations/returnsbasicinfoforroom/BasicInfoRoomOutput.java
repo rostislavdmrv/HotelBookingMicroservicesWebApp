@@ -15,11 +15,11 @@ import java.util.UUID;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class BasicInfoRoomOutput {
 
     @JsonIgnore
-    private UUID roomId;
+    private String roomId;
     private BigDecimal price;
     private Integer floor;
     private List<String> bedSize;

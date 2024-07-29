@@ -14,5 +14,5 @@ import java.util.UUID;
 @Builder
 public class DeleteRoomInput {
     @NotBlank(message = "Room ID cannot be blank")
-    private UUID roomId;
+    private String roomId;
 }

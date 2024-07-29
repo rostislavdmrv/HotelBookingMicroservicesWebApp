@@ -20,11 +20,9 @@ public class PartialUpdateRoomInput {
 
 
     @JsonIgnore
-    private UUID roomId;
+    private String roomId;
 
-    @Valid
-    @Schema(example = "single")
-    @NotBlank(message = "Bed size cannot be blank")
+
     private List<String> beds;
 
     @Schema(example = "private")

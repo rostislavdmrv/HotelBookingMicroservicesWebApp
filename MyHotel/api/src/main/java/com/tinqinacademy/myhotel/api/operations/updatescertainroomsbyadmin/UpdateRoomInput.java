@@ -21,7 +21,7 @@ public class UpdateRoomInput {
 
     
     @JsonIgnore
-    private UUID roomId;
+    private String roomId;
 
 
     private List<String> beds;
