@@ -12,6 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class UnbookRoomInput {
-    @NotBlank(message = "Room ID cannot be blank")
-    private UUID roomId;
+    @NotBlank(message = "Booking ID cannot be blank")
+    private String bookingId;
 }

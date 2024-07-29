@@ -16,7 +16,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 
     Optional<List<Reservation>> findAllByRoomId (UUID roomId);
     Optional<Reservation> findByRoomIdAndStartDateAndEndDate(UUID id, LocalDate startDate, LocalDate endDate);
-
     @Query("""
                      SELECT res FROM Reservation res 
                      WHERE res.room.id = :roomId 
@@ -24,27 +23,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
                      OR (res.endDate BETWEEN :startDate AND :endDate))
             """)
     Optional<List<Reservation>> findByRoomIdAndDateRange(@Param("roomId") UUID roomId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-
-    //boolean existsByRoomIdAndBetwenStartAndEndDate(UUID roomId, LocalDate startDate, LocalDate endDate);
-
-//    @Query("""
-//            SELECT DISTINCT r.id
-//                FROM Room r
-//                JOIN r.beds b
-//                LEFT JOIN Reservation res ON r.id = res.roomId
-//                WHERE (res.startDate IS NULL OR res.endDate IS NULL OR res.startDate >= :endDate OR res.endDate <= :startDate)
-//                AND (:bathroomType IS NULL OR r.bathroomType = :bathroomType)
-//                AND (:bedSize IS NULL OR b.bedSize = :bedSize)
-//                AND (:bedCount IS NULL OR (SELECT COUNT(rb) FROM r.beds rb) = :bedCount)
-//            """)
-//    List<UUID> searchForAvailableRooms(
-//            @Param("startDate") LocalDate startDate,
-//            @Param("endDate") LocalDate endDate,
-//            @Param("bathroomType") String bathroomType,
-//            @Param("bedSize") String bedSize,
-//            @Param("bedCount") Integer bedCount);
-
-    List<Reservation> findByRoomId(UUID roomId);
 
     Optional<Reservation> findById(UUID id);
 }

@@ -75,7 +75,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @GetMapping(RestApiRoutes.RETRIEVE_BASIC_INFO)
-    public ResponseEntity<BasicInfoRoomOutput> infoForRoom(@PathVariable UUID roomId) {
+    public ResponseEntity<BasicInfoRoomOutput> infoForRoom(@PathVariable String roomId) {
 
         BasicInfoRoomInput inputId = BasicInfoRoomInput.builder().roomId(roomId).build();
 
@@ -93,7 +93,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @PostMapping(RestApiRoutes.BOOK_ROOM)
-    public ResponseEntity<BookRoomOutput> bookRoom(@PathVariable UUID roomId , @Valid @RequestBody BookRoomInput input) {
+    public ResponseEntity<BookRoomOutput> bookRoom(@PathVariable String roomId , @Valid @RequestBody BookRoomInput input) {
 
         BookRoomInput updatedInput = input.toBuilder()
                 .roomId(roomId)
@@ -113,10 +113,10 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Reservation not found")
     })
     @DeleteMapping(RestApiRoutes.DELETE_RESERVATION)
-    public ResponseEntity<UnbookRoomOutput> removeBookedRoom(@PathVariable UUID bookingId) {
+    public ResponseEntity<UnbookRoomOutput> removeBookedRoom(@PathVariable String bookingId) {
 
         UnbookRoomInput unbookRoomInput = UnbookRoomInput.builder()
-                .roomId(bookingId)
+                .bookingId(bookingId)
                 .build();
 
         UnbookRoomOutput result = roomService.removeBookedRoom(unbookRoomInput);

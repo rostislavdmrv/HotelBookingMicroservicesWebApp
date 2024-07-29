@@ -18,7 +18,7 @@ public class BookRoomInput {
 
 
     @JsonIgnore
-    private UUID roomId;
+    private String roomId;
 
     @Schema(example = "2024-08-01")
     @NotNull(message = "Start date cannot be null")
