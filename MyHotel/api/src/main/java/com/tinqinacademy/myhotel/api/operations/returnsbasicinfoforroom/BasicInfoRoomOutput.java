@@ -1,6 +1,7 @@
 package com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tinqinacademy.myhotel.api.base.OperationOutput;
 import com.tinqinacademy.myhotel.api.models.enums.BathroomType;
 import com.tinqinacademy.myhotel.api.models.enums.BedSize;
 import lombok.*;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class BasicInfoRoomOutput {
+public class BasicInfoRoomOutput implements OperationOutput {
 
     @JsonIgnore
     private String roomId;

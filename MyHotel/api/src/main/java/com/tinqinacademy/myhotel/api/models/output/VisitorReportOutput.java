@@ -1,5 +1,6 @@
 package com.tinqinacademy.myhotel.api.models.output;
 
+import com.tinqinacademy.myhotel.api.base.OperationOutput;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VisitorReportOutput {
+public class VisitorReportOutput implements OperationOutput {
     private LocalDate startDate;
     private LocalDate endDate;
     private String firstName;

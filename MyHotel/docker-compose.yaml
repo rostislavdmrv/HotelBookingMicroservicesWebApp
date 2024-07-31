@@ -5,7 +5,7 @@ networks:
 
 services:
   db:
-    container_name: rostislav-comments-db
+    container_name: rostislav-hotels-db
     image: postgres:latest
     ports:
       - 5432:5432
@@ -15,8 +15,11 @@ services:
       POSTGRES_DB: hotel-manager
     volumes:
       - db-data:/var/lib/postresql/data
+      - ./create_db.sh:/docker-entrypoint-initdb.d/create_db.sh
     networks:
       - net1
+
+
 
 volumes:
   db-data:

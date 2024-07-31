@@ -1,5 +1,6 @@
 package com.tinqinacademy.myhotel.api.models.input;
 
+import com.tinqinacademy.myhotel.api.base.OperationInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VisitorInput {
+public class VisitorInput implements OperationInput {
 
     @Schema(example = "2024-08-01")
     @NotNull(message = "Start date cannot be null")

@@ -1,10 +1,15 @@
 package com.tinqinacademy.myhotel.core.services.system.impl;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.fge.jsonpatch.JsonPatchException;
+import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.tinqinacademy.myhotel.api.exceptions.NoMatchException;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
 import com.tinqinacademy.myhotel.api.exceptions.messages.Messages;
+import com.tinqinacademy.myhotel.core.exceptions.RoomForUpdateInput;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomInput;
@@ -31,10 +36,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+
+import java.io.IOException;
+import java.util.*;
 
 
 @Slf4j
@@ -42,11 +46,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SystemServiceImpl implements SystemService {
 
-    private  final RoomRepository roomRepository;
+    private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final GuestRepository guestRepository;
     private final ReservationRepository reservationRepository;
-    private  final BedRepository bedRepository;
+    private final BedRepository bedRepository;
     private final ConversionService conversionService;
     private final ObjectMapper objectMapper;
 
@@ -58,13 +62,13 @@ public class SystemServiceImpl implements SystemService {
         for (VisitorInput visitorInput : input.getVisitorInputs()) {
             UUID roomId = UUID.fromString(visitorInput.getRoomId());
             Room room = roomRepository.findById(roomId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Room","roomId",roomId.toString()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Room", "roomId", roomId.toString()));
 
             Guest guest = conversionService.convert(visitorInput, Guest.class);
 
             Reservation reservation = reservationRepository.findByRoomIdAndStartDateAndEndDate(
                             room.getId(), visitorInput.getStartDate(), visitorInput.getEndDate())
-                    .orElseThrow(() -> new ResourceNotFoundException("Reservation","roomId",room.getId().toString()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Reservation", "roomId", room.getId().toString()));
 
             reservation.getGuests().add(guest);
 
@@ -83,64 +87,119 @@ public class SystemServiceImpl implements SystemService {
     public ReportOutput reportByCriteria(ReportInput input) {
         log.info("Starts getting room renters occupancy {}", input);
 
-        Room room = roomRepository.findByRoomNumber(input.getRoomNo())
-                .orElseThrow(() -> new ResourceNotFoundException("Room","roomNo",input.getRoomNo()));
+        Map<UUID, VisitorReportOutput> guestMap = new HashMap<>();
 
-        // find all existing reservations that match: roomId, startDate, endDate
-        List<Reservation> reservations = reservationRepository.findByRoomIdAndDateRange(
-                        room.getId(), input.getStartDate(), input.getEndDate())
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation","roomId",room.getId().toString()));
+        //1. Search by startDate and endDate
+        if (input.getStartDate() != null && input.getEndDate() != null) {
 
-        // find all existing guests that match: firstName, lastName, phoneNo,idCardNo, idCardValidity, idCardIssueAuthority, idCardIssueDate
-        List<Guest> matchingGuests = guestRepository.findMatchingGuests(
-                        input.getFirstName(),
-                        input.getLastName(),
-                        input.getPhoneNo(),
-                        input.getIdCardNo(),
-                        input.getIdCardValidity().toString(),
-                        input.getIdCardIssueAuthority(),
-                        input.getIdCardIssueDate().toString()
-                )
-                .orElseThrow(() -> new ResourceNotFoundException("Guest","roomId",room.getId().toString()));
+            List<Reservation> reservations = reservationRepository
+                    .findByDateRange(input.getStartDate(), input.getEndDate())
+                    .orElse(Collections.emptyList());
 
-        List<VisitorReportOutput> guestOutputs = new ArrayList<>();
-
-        // iterate through the reservations and through the guests, and find if any booking contains one of the matching guests
-        for (Reservation res : reservations) {
-            for (Guest guest : matchingGuests) {
-                if (res.getGuests().contains(guest)) {
-
-                    VisitorReportOutput visitor = Objects.requireNonNull(conversionService.convert(guest, VisitorReportOutput.VisitorReportOutputBuilder.class))
-                            .startDate(res.getStartDate())
-                            .endDate(res.getEndDate())
-                            .build();
-
-                    guestOutputs.add(visitor);
+            for (Reservation booking : reservations) {
+                for (Guest guest : booking.getGuests()) {
+                    VisitorReportOutput guestOutput =
+                            Objects.requireNonNull(conversionService.convert(guest, VisitorReportOutput.VisitorReportOutputBuilder.class))
+                                    .startDate(booking.getStartDate())
+                                    .endDate(booking.getEndDate())
+                                    .build();
+                    guestMap.putIfAbsent(guest.getId(), guestOutput);
                 }
             }
         }
 
-        if (guestOutputs.isEmpty()) {
+        //2. Search by guest details
+        if (input.getFirstName() != null &&
+                input.getLastName() != null &&
+                input.getRoomNo() != null &&
+                input.getIdCardNo() != null &&
+                input.getIdCardValidity() != null &&
+                input.getIdCardIssueAuthority() != null &&
+                input.getIdCardIssueDate() != null) {
+
+            List<Guest> matchingGuests = guestRepository.findMatchingGuests(
+                    input.getFirstName(),
+                    input.getLastName(),
+                    input.getPhoneNo(),
+                    input.getIdCardNo(),
+                    input.getIdCardValidity().toString(),
+                    input.getIdCardIssueAuthority(),
+                    input.getIdCardIssueDate().toString()
+            ).orElse(Collections.emptyList());
+
+            for (Guest guest : matchingGuests) {
+                List<Reservation> reservations = reservationRepository.findByGuestIdCardNumber(guest.getIdCardNumber())
+                        .orElse(Collections.emptyList());
+
+                if (reservations.isEmpty()) {
+                    if (!guestMap.containsKey(guest.getId())) {
+                        VisitorReportOutput guestOutput = conversionService.convert(guest, VisitorReportOutput.class);
+                        guestMap.put(guest.getId(), guestOutput);
+                    }
+                } else {
+                    for (Reservation booking : reservations) {
+                        if (!guestMap.containsKey(guest.getId())) {
+                            VisitorReportOutput guestOutput =
+                                    Objects.requireNonNull(conversionService.convert(guest, VisitorReportOutput.VisitorReportOutputBuilder.class))
+                                            .startDate(booking.getStartDate())
+                                            .endDate(booking.getEndDate())
+                                            .build();
+                            guestMap.put(guest.getId(), guestOutput);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        //3. Search by room number
+        if (input.getRoomNo() != null) {
+            Room room = roomRepository.findByRoomNumber(input.getRoomNo())
+                    .orElseThrow(() -> new ResourceNotFoundException("Room", "roomNo", input.getRoomNo()));
+
+            List<Reservation> reservations = reservationRepository.findByRoomId(room.getId())
+                    .orElse(Collections.emptyList());
+
+            for (Reservation booking : reservations) {
+                for (Guest guest : booking.getGuests()) {
+                    if (!guestMap.containsKey(guest.getId())) {
+                        VisitorReportOutput guestOutput =
+                                Objects.requireNonNull(conversionService.convert(guest, VisitorReportOutput.VisitorReportOutputBuilder.class))
+                                        .startDate(booking.getStartDate())
+                                        .endDate(booking.getEndDate())
+                                        .build();
+                        guestMap.put(guest.getId(), guestOutput);
+                    }
+                }
+            }
+        }
+
+        if (guestMap.isEmpty()) {
             throw new NoMatchException(Messages.NO_MATCHING);
         }
 
-
-        ReportOutput output = ReportOutput.builder().roomRenters(guestOutputs).build();
+        List<VisitorReportOutput> values = new ArrayList<>(guestMap.values());
+        ReportOutput output = ReportOutput.builder()
+                .reports(values)
+                .build();
         log.info("End : Successfully made report {}", output);
         return output;
+
+
     }
 
     @Override
     public CreateRoomOutput createNewRoom(CreateRoomInput input) {
 
         log.info("Starts creating new room {}", input);
-//        if (roomRepository.existsRoomNo(input.getRoomNo())) {
-//            throw new RoomNoAlreadyExistsException(input.getRoomNo());
-//        }
+
+        if (roomRepository.existsRoomByRoomNumber(input.getRoomNo())) {
+            throw new ResourceNotFoundException("Room", "roomNo", input.getRoomNo());
+        }
 
         BathroomType bathroomType = BathroomType.getFromCode(input.getBathroomType());
         if (bathroomType.equals(BathroomType.UNKNOWN)) {
-            throw new ResourceNotFoundException("BathroomType","bathroomType",input.getBathroomType());
+            throw new ResourceNotFoundException("BathroomType", "bathroomType", input.getBathroomType());
 
         }
 
@@ -148,7 +207,7 @@ public class SystemServiceImpl implements SystemService {
         for (String size : input.getBeds()) {
             BedSize bedSize = BedSize.valueOf(size.toUpperCase());
             Bed bed = bedRepository.findByBedSize(bedSize)
-                    .orElseThrow(() -> new ResourceNotFoundException("Bed","bedSize",bedSize.toString()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Bed", "bedSize", bedSize.toString()));
             roomBeds.add(bed);
         }
 
@@ -169,23 +228,23 @@ public class SystemServiceImpl implements SystemService {
         UUID roomId = UUID.fromString(input.getRoomId());
 
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room","roomId",roomId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Room", "roomId", roomId.toString()));
 
         BathroomType bathroomType = BathroomType.getFromCode(input.getBathroomType());
         if (bathroomType.equals(BathroomType.UNKNOWN)) {
-            throw new ResourceNotFoundException("BathroomType","bathroomType",input.getBathroomType());
+            throw new ResourceNotFoundException("BathroomType", "bathroomType", input.getBathroomType());
 
         }
 
         if (roomRepository.existsRoomByRoomNumber(input.getRoomNo())) {
-            throw new ResourceNotFoundException("Room","roomNo",input.getRoomNo());
+            throw new ResourceNotFoundException("Room", "roomNo", input.getRoomNo());
         }
 
         List<Bed> roomBeds = new ArrayList<>();
         for (String size : input.getBeds()) {
             BedSize bedSize = BedSize.valueOf(size.toUpperCase());
             Bed bed = bedRepository.findByBedSize(bedSize)
-                    .orElseThrow(() -> new ResourceNotFoundException("Bed","bedSize",bedSize.toString()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Bed", "bedSize", bedSize.toString()));
             roomBeds.add(bed);
         }
 
@@ -209,39 +268,50 @@ public class SystemServiceImpl implements SystemService {
 
         UUID roomId = UUID.fromString(input.getRoomId());
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room","roomId",roomId.toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Room", "roomId", roomId.toString()));
 
-        // Update room properties with the provided values
-        room.setRoomFloor(input.getFloor());
-        room.setRoomNumber(input.getRoomNo());
-
-        BathroomType bathroomType = BathroomType.getFromCode(input.getBathroomType());
-        if (bathroomType.equals(BathroomType.UNKNOWN)) {
-            throw new ResourceNotFoundException("BathroomType","bathroomType",input.getBathroomType());
+        List<Bed> roomBeds = new ArrayList<>();
+        for (String size : input.getBeds()) {
+            BedSize bedSize = BedSize.valueOf(size.toUpperCase());
+            Bed bed = bedRepository.findByBedSize(bedSize)
+                    .orElseThrow(() -> new ResourceNotFoundException("Bed", "bedSize", bedSize.toString()));
+            roomBeds.add(bed);
         }
-        room.setBathroomType(bathroomType);
+        RoomForUpdateInput updateInput = Objects.requireNonNull(conversionService.convert(input, RoomForUpdateInput.RoomForUpdateInputBuilder.class)).beds(roomBeds).build();
 
-        room.setPrice(input.getPrice());
+        JsonNode roomNode = objectMapper.valueToTree(room);
 
-        // Handle bed updates if needed
-        if (input.getBeds() != null && !input.getBeds().isEmpty()) {
-            List<Bed> roomBeds = new ArrayList<>();
-            for (String size : input.getBeds()) {
-                BedSize bedSize = BedSize.valueOf(size.toUpperCase());
-                Bed bed = bedRepository.findByBedSize(bedSize)
-                        .orElseThrow(() -> new ResourceNotFoundException("Bed","bedSize",bedSize.toString()));
-                roomBeds.add(bed);
-            }
-            room.setBeds(roomBeds);
+        JsonNode inputNode = objectMapper.valueToTree(updateInput);
+
+        try {
+            JsonMergePatch patch = JsonMergePatch.fromJson(inputNode);
+            JsonNode patchedNode = patch.apply(roomNode);
+
+            Room patchedRoom = objectMapper.treeToValue(patchedNode, Room.class);
+
+            roomRepository.save(patchedRoom);
+
+            PartialUpdateRoomOutput output = conversionService.convert(patchedRoom, PartialUpdateRoomOutput.class);
+            log.info("End: Successfully partially updated room with ID {}", output.getRoomId());
+
+            return output;
+        } catch (JsonPatchException | IOException e) {
+            throw new RuntimeException("Failed to apply patch to room: " + e.getMessage(), e);
         }
 
+    }
+    private JsonNode applyPatch(JsonNode existingRoomNode, JsonNode updateRequestNode) {
+        // Create a copy of the existing room node
+        JsonNode patchedNode = existingRoomNode.deepCopy();
 
-        roomRepository.save(room);
+        // Iterate over fields in the update request and apply changes
+        Iterator<Map.Entry<String, JsonNode>> fields = updateRequestNode.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            ((ObjectNode) patchedNode).set(field.getKey(), field.getValue());
+        }
 
-        PartialUpdateRoomOutput output = conversionService.convert(room, PartialUpdateRoomOutput.class);
-        log.info("End: Successfully partially updated room with ID {}", output.getRoomId());
-
-        return output;
+        return patchedNode;
     }
 
 
@@ -252,7 +322,7 @@ public class SystemServiceImpl implements SystemService {
         UUID roomId = UUID.fromString(input.getRoomId());
 
         if (!roomRepository.existsById(roomId)) {
-            throw new ResourceNotFoundException("Room","roomId",roomId.toString());
+            throw new ResourceNotFoundException("Room", "roomId", roomId.toString());
         }
 
         roomRepository.deleteById(roomId);

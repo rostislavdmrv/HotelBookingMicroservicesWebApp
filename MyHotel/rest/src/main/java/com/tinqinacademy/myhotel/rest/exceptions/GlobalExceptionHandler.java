@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions( MethodArgumentNotValidException ex) {
         ErrorWrapper errorWrappers = errorService.errorHandler(ex);
-        return new ResponseEntity<>(errorWrappers.getErrors(), errorWrappers.getErrorCode());
+        return new ResponseEntity<>(errorWrappers.getErrors(), errorWrappers.getErrorHttpCode());
     }
 
 

@@ -93,7 +93,7 @@ public class RoomServiceImpl implements RoomService {
             }
         }
 
-        BasicInfoRoomOutput output = conversionService.convert(room, BasicInfoRoomOutput.BasicInfoRoomOutputBuilder.class)
+        BasicInfoRoomOutput output = Objects.requireNonNull(conversionService.convert(room, BasicInfoRoomOutput.BasicInfoRoomOutputBuilder.class))
                 .datesOccupied(datesOccupied).build();
 
         log.info("End: Found room info: {}", output);

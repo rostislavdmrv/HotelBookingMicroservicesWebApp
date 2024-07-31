@@ -2,19 +2,27 @@ package com.tinqinacademy.myhotel.rest.controllers.hotel;
 
 
 import com.tinqinacademy.myhotel.api.interfaces.room.RoomService;
+import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomInput;
+import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomOperation;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomOutput;
+import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomOperation;
+import com.tinqinacademy.myhotel.api.operations.isroomavailable.IsRoomFreeOperation;
 import com.tinqinacademy.myhotel.api.operations.isroomavailable.RoomInput;
 import com.tinqinacademy.myhotel.api.operations.isroomavailable.RoomOutput;
 import com.tinqinacademy.myhotel.api.operations.removesroomreservation.UnbookRoomInput;
+import com.tinqinacademy.myhotel.api.operations.removesroomreservation.UnbookRoomOperation;
 import com.tinqinacademy.myhotel.api.operations.removesroomreservation.UnbookRoomOutput;
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomInput;
+import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomOperation;
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomOutput;
+import com.tinqinacademy.myhotel.rest.controllers.BaseController;
 import com.tinqinacademy.myhotel.rest.restapiroutes.RestApiRoutes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.vavr.control.Either;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,9 +38,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Room REST APIs")
-public class RoomController {
+public class RoomController extends BaseController {
 
-    private final RoomService roomService;
+    private final BasicInfoRoomOperation basicInfoRoomOperation;
+    private final BookRoomOperation bookRoomOperation;
+    private final IsRoomFreeOperation isRoomFreeOperation;
+    private final UnbookRoomOperation unbookRoomOperation;
+
 
 
     @Operation(summary = "Checks for available room for certain period", description = "Checks the availability of a room based on the provided details")
@@ -43,7 +55,7 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @GetMapping(RestApiRoutes.CHECK_AVAILABILITY)
-    public ResponseEntity<RoomOutput> isRoomAvailable(
+    public ResponseEntity<?> isRoomAvailable(
              @RequestParam(required = false) LocalDate start,
              @RequestParam(required = false) LocalDate end,
              @RequestParam(required = false) Integer bedCount,
@@ -59,13 +71,12 @@ public class RoomController {
                 .bathroomType(bathroomType)
                 .build();
 
-        RoomOutput result = roomService.getAvailableRooms(input);
+        Either<ErrorWrapper,RoomOutput> result = isRoomFreeOperation.process(input);
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return handle(result);
 
 
     }
-
 
     @Operation(summary = "Retrieves basic information for the specified room by specific ID", description = "Retrieves basic information for the specified room on the provided details")
     @ApiResponses(value = {
@@ -75,12 +86,14 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @GetMapping(RestApiRoutes.RETRIEVE_BASIC_INFO)
-    public ResponseEntity<BasicInfoRoomOutput> infoForRoom(@PathVariable String roomId) {
+    public ResponseEntity<?> infoForRoom(@PathVariable String roomId) {
 
-        BasicInfoRoomInput inputId = BasicInfoRoomInput.builder().roomId(roomId).build();
+        BasicInfoRoomInput input = BasicInfoRoomInput.builder()
+                .roomId(roomId)
+                .build();
 
-        BasicInfoRoomOutput result = roomService.getInfoForRoom(inputId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+         Either<ErrorWrapper,BasicInfoRoomOutput> result = basicInfoRoomOperation.process(input);
+        return handle(result);
 
     }
 
@@ -93,17 +106,16 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Room not found")
     })
     @PostMapping(RestApiRoutes.BOOK_ROOM)
-    public ResponseEntity<BookRoomOutput> bookRoom(@PathVariable String roomId , @Valid @RequestBody BookRoomInput input) {
+    public ResponseEntity<?> bookRoom(@PathVariable String roomId ,@RequestBody BookRoomInput input) {
 
         BookRoomInput updatedInput = input.toBuilder()
                 .roomId(roomId)
                 .build();
 
-        BookRoomOutput result = roomService.bookRoom(updatedInput);
-        return new ResponseEntity<>(result, HttpStatus.CREATED);
+        Either<ErrorWrapper,BookRoomOutput> result = bookRoomOperation.process(updatedInput);
+        return handleWithStatus(result, HttpStatus.CREATED);
 
     }
-
 
     @Operation(summary = "Remove room reservation by specific ID", description = "Cancels a reservation for a specified room and date range.")
     @ApiResponses(value = {
@@ -113,14 +125,14 @@ public class RoomController {
             @ApiResponse(responseCode = "404", description = "Reservation not found")
     })
     @DeleteMapping(RestApiRoutes.DELETE_RESERVATION)
-    public ResponseEntity<UnbookRoomOutput> removeBookedRoom(@PathVariable String bookingId) {
+    public ResponseEntity<?> removeBookedRoom(@PathVariable String bookingId) {
 
         UnbookRoomInput unbookRoomInput = UnbookRoomInput.builder()
                 .bookingId(bookingId)
                 .build();
 
-        UnbookRoomOutput result = roomService.removeBookedRoom(unbookRoomInput);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        Either<ErrorWrapper,UnbookRoomOutput> result = unbookRoomOperation.process(unbookRoomInput);
+        return handle(result);
 
     }
 

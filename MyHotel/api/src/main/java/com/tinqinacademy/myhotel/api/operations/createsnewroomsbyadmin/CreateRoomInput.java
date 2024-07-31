@@ -2,6 +2,7 @@ package com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin;
 
 
 
+import com.tinqinacademy.myhotel.api.base.OperationInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -15,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateRoomInput {
+public class CreateRoomInput implements OperationInput {
 
     private List<String> beds;
 

@@ -14,6 +14,6 @@ import java.util.List;
 public class ErrorWrapper {
 
     private List<ErrorsResponse> errors;
-    private HttpStatus errorCode;
+    private HttpStatus errorHttpCode;
 
 }

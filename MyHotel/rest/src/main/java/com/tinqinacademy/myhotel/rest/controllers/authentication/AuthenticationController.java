@@ -1,16 +1,18 @@
 package com.tinqinacademy.myhotel.rest.controllers.authentication;
 
 import com.tinqinacademy.myhotel.api.interfaces.authentication.AuthenticationService;
+import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
 import com.tinqinacademy.myhotel.api.operations.singup.SignUpInput;
+import com.tinqinacademy.myhotel.api.operations.singup.SignUpOperation;
 import com.tinqinacademy.myhotel.api.operations.singup.SignUpOutput;
+import com.tinqinacademy.myhotel.rest.controllers.BaseController;
 import com.tinqinacademy.myhotel.rest.restapiroutes.RestApiRoutes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,9 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Authentication REST APIs")
-public class AuthenticationController {
+public class AuthenticationController extends BaseController {
 
     private final AuthenticationService authenticationService;
+    private final SignUpOperation signUpOperation;
 
     @Operation(
             summary = "Sign Up User",
@@ -43,8 +46,9 @@ public class AuthenticationController {
     })
 
     @PostMapping(RestApiRoutes.SIGN_UP)
-    public ResponseEntity<SignUpOutput> signUp(@Valid @RequestBody SignUpInput input) {
-        SignUpOutput output = authenticationService.signUp(input);
-        return new ResponseEntity<>(output, HttpStatus.CREATED);
+    public ResponseEntity<?> signUp(@RequestBody SignUpInput input) {
+
+        Either<ErrorWrapper,SignUpOutput> output = signUpOperation.process(input);
+        return handle(output);
     }
 }

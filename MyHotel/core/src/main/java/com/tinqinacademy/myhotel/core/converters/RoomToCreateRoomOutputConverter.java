@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class RoomToCreateRoomOutput implements Converter<Room, CreateRoomOutput> {
+public class RoomToCreateRoomOutputConverter implements Converter<Room, CreateRoomOutput> {
 
     @Override
     public CreateRoomOutput convert(Room source) {
         log.info("Started Converter - Room to CreateRoomOutput");
 
         CreateRoomOutput createRoomOutput = CreateRoomOutput.builder()
-                .roomId(source.getId())
+                .roomId(source.getId().toString())
                 .build();
 
         log.info("Ended Converter - Room to CreateRoomOutput");

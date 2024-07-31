@@ -1,6 +1,7 @@
 package com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tinqinacademy.myhotel.api.base.OperationInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -16,14 +17,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class PartialUpdateRoomInput {
+public class PartialUpdateRoomInput implements OperationInput {
 
 
     @JsonIgnore
     private String roomId;
 
-
     private List<String> beds;
+
 
     @Schema(example = "private")
     @NotBlank(message = "Bathroom type cannot be blank")

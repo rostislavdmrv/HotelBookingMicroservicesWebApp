@@ -2,6 +2,7 @@ package com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tinqinacademy.myhotel.api.base.OperationInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class UpdateRoomInput {
+public class UpdateRoomInput  implements OperationInput {
 
     
     @JsonIgnore

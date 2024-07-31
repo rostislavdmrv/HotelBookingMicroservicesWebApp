@@ -1,6 +1,7 @@
 package com.tinqinacademy.myhotel.api.operations.booksroomspecified;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tinqinacademy.myhotel.api.base.OperationInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class BookRoomInput {
+public class BookRoomInput implements OperationInput {
 
 
     @JsonIgnore
