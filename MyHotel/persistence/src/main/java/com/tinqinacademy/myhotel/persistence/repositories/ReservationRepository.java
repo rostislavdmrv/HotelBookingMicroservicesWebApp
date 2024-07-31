@@ -24,5 +24,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
             """)
     Optional<List<Reservation>> findByRoomIdAndDateRange(@Param("roomId") UUID roomId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
+    @Query("""
+                     SELECT res FROM Reservation res 
+                     WHERE (res.startDate BETWEEN :startDate AND :endDate) 
+                     OR (res.endDate BETWEEN :startDate AND :endDate)
+            """)
+    Optional<List<Reservation>> findByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    Optional<List<Reservation>> findByRoomId(UUID roomId);
+
+    @Query("""
+                     SELECT res FROM Reservation res
+                     JOIN res.guests g
+                     WHERE g.idCardNumber = :idCardNumber
+            """)
+    Optional<List<Reservation>> findByGuestIdCardNumber(@Param("idCardNumber") String idCardNumber);
+
     Optional<Reservation> findById(UUID id);
 }

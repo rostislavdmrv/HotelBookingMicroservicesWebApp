@@ -1,5 +1,6 @@
 package com.tinqinacademy.myhotel.api.operations.isroomavailable;
 
+import com.tinqinacademy.myhotel.api.base.OperationInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RoomInput {
+public class RoomInput implements OperationInput {
 
     @NotBlank(message = "ID cannot be blank")
     private String id;

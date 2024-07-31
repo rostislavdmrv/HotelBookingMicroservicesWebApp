@@ -1,5 +1,6 @@
 package com.tinqinacademy.myhotel.api.operations.retrivesreports;
 
+import com.tinqinacademy.myhotel.api.base.OperationOutput;
 import com.tinqinacademy.myhotel.api.models.output.VisitorReportOutput;
 import lombok.*;
 
@@ -11,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReportOutput {
-    private List<VisitorReportOutput> roomRenters;
+public class ReportOutput implements OperationOutput {
+    private List<VisitorReportOutput> reports;
 }

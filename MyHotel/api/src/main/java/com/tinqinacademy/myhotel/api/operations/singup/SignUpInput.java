@@ -1,5 +1,6 @@
 package com.tinqinacademy.myhotel.api.operations.singup;
 
+import com.tinqinacademy.myhotel.api.base.OperationInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -10,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SignUpInput {
+public class SignUpInput implements OperationInput {
 
     @Schema(example = "Elena")
     @NotBlank(message = "Field firstName must not be empty")

@@ -25,6 +25,6 @@ public class ErrorServiceImpl  implements ErrorService {
 
         return ErrorWrapper.builder()
                 .errors(errors)
-                .errorCode(HttpStatus.BAD_REQUEST).build();
+                .errorHttpCode(HttpStatus.BAD_REQUEST).build();
     }
 }

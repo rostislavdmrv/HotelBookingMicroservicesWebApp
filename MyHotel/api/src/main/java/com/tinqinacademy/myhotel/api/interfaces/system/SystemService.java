@@ -28,7 +28,7 @@ public interface SystemService {
 
     UpdateRoomOutput updateAlreadyExistRoom(UpdateRoomInput input);
 
-    PartialUpdateRoomOutput partialUpdateRoom(PartialUpdateRoomInput input);
+    PartialUpdateRoomOutput partialUpdateRoom(PartialUpdateRoomInput input) ;
 
     DeleteRoomOutput deleteRooms(DeleteRoomInput input);
 }
