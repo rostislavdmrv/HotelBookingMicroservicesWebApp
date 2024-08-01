@@ -3,6 +3,7 @@ package com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin;
 
 
 import com.tinqinacademy.myhotel.api.base.OperationInput;
+import com.tinqinacademy.myhotel.api.validations.bathroomtype.BathroomTypeValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -23,6 +24,7 @@ public class CreateRoomInput implements OperationInput {
     @Schema(example = "private")
     @NotBlank(message = "Bathroom type cannot be blank")
     @Size(min = 5, max = 30, message = "Bathroom type cannot exceed 30 characters")
+    @BathroomTypeValidation
     private String bathroomType;
 
 

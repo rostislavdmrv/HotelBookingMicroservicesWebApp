@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.core.processors;
+package com.tinqinacademy.myhotel.core.processors.system;
 
 import com.tinqinacademy.myhotel.api.errors.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;

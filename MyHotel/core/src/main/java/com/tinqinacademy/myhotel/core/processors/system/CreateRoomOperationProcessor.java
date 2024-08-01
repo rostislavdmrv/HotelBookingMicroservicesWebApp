@@ -1,9 +1,8 @@
-package com.tinqinacademy.myhotel.core.processors;
+package com.tinqinacademy.myhotel.core.processors.system;
 
 import com.tinqinacademy.myhotel.api.errors.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
 import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
-import com.tinqinacademy.myhotel.api.models.error.ErrorsResponse;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomOperation;
 import com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin.CreateRoomOutput;
@@ -17,12 +16,9 @@ import com.tinqinacademy.myhotel.persistence.repositories.RoomRepository;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import jakarta.validation.Validator;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.Errors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,18 +52,12 @@ public class CreateRoomOperationProcessor extends BaseOperationProcessor impleme
     }
     private CreateRoomOutput processCreateRoom(CreateRoomInput input) {
         validateInput(input);
-
         validateBathroomType(input.getBathroomType());
-
         List<Bed> roomBeds = findBeds(input.getBeds());
-
         Room room = buildRoom(input, roomBeds);
-
         roomRepository.save(room);
-
         CreateRoomOutput output = convertToOutput(room);
         log.info("End : Successfully creating new room with ID {}", output.getRoomId());
-
         return output;
     }
 

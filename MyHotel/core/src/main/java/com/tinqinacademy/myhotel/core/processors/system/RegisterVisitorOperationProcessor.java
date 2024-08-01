@@ -1,9 +1,8 @@
-package com.tinqinacademy.myhotel.core.processors;
+package com.tinqinacademy.myhotel.core.processors.system;
 
 import com.tinqinacademy.myhotel.api.errors.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
 import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
-import com.tinqinacademy.myhotel.api.models.error.ErrorsResponse;
 import com.tinqinacademy.myhotel.api.models.input.VisitorInput;
 import com.tinqinacademy.myhotel.api.operations.registersvisitors.RegisterVisitorInput;
 import com.tinqinacademy.myhotel.api.operations.registersvisitors.RegisterVisitorOperation;
@@ -18,17 +17,12 @@ import com.tinqinacademy.myhotel.persistence.repositories.RoomRepository;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import jakarta.validation.Validator;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
-
-import static io.vavr.API.*;
 
 @Service
 @Slf4j
