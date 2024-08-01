@@ -1,4 +1,4 @@
-package com.tinqinacademy.myhotel.core.processors;
+package com.tinqinacademy.myhotel.core.processors.system;
 
 import com.tinqinacademy.myhotel.api.errors.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.NoMatchException;
@@ -50,9 +50,18 @@ public class ReportOperationProcessor extends BaseOperationProcessor implements 
         return Try.of(() -> {
                     validateInput(input);
                     Map<UUID, VisitorReportOutput> guestMap = new HashMap<>();
-                    processDateRangeCriteria(input, guestMap);
-                    processGuestDetailsCriteria(input, guestMap);
-                    processRoomNumberCriteria(input, guestMap);
+
+                    if (input.getStartDate() != null && input.getEndDate() != null) {
+                        processReservationsByDateRange(input, guestMap);
+                    }
+
+                    if (hasCompleteGuestDetails(input)) {
+                        processGuestsByDetails(input, guestMap);
+                    }
+
+                    if (input.getRoomNo() != null) {
+                        processReservationsByRoomNumber(input, guestMap);
+                    }
 
                     if (guestMap.isEmpty()) {
                         throw new NoMatchException(Messages.NO_MATCHING);
@@ -68,9 +77,20 @@ public class ReportOperationProcessor extends BaseOperationProcessor implements 
                 })
                 .toEither()
                 .mapLeft(errorHandler::handleErrors);
+
     }
 
-    private void processDateRangeCriteria(ReportInput input, Map<UUID, VisitorReportOutput> guestMap) {
+    private boolean hasCompleteGuestDetails(ReportInput input) {
+        return input.getFirstName() != null &&
+                input.getLastName() != null &&
+                input.getRoomNo() != null &&
+                input.getIdCardNo() != null &&
+                input.getIdCardValidity() != null &&
+                input.getIdCardIssueAuthority() != null &&
+                input.getIdCardIssueDate() != null;
+    }
+
+    private void processReservationsByDateRange(ReportInput input, Map<UUID, VisitorReportOutput> guestMap) {
         List<Reservation> reservations = reservationRepository
                 .findByDateRange(input.getStartDate(), input.getEndDate())
                 .orElse(Collections.emptyList());
@@ -87,8 +107,7 @@ public class ReportOperationProcessor extends BaseOperationProcessor implements 
         }
     }
 
-    // Private method for processing by guest details
-    private void processGuestDetailsCriteria(ReportInput input, Map<UUID, VisitorReportOutput> guestMap) {
+    private void processGuestsByDetails(ReportInput input, Map<UUID, VisitorReportOutput> guestMap) {
         List<Guest> matchingGuests = guestRepository.findMatchingGuests(
                 input.getFirstName(),
                 input.getLastName(),
@@ -123,8 +142,7 @@ public class ReportOperationProcessor extends BaseOperationProcessor implements 
         }
     }
 
-    // Private method for processing by room number
-    private void processRoomNumberCriteria(ReportInput input, Map<UUID, VisitorReportOutput> guestMap) {
+    private void processReservationsByRoomNumber(ReportInput input, Map<UUID, VisitorReportOutput> guestMap) {
         Room room = roomRepository.findByRoomNumber(input.getRoomNo())
                 .orElseThrow(() -> new ResourceNotFoundException("Room", "roomNo", input.getRoomNo()));
 
@@ -143,5 +161,6 @@ public class ReportOperationProcessor extends BaseOperationProcessor implements 
                 }
             }
         }
+
     }
 }

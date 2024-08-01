@@ -2,14 +2,12 @@ package com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tinqinacademy.myhotel.api.base.OperationOutput;
-import com.tinqinacademy.myhotel.api.models.enums.BathroomType;
-import com.tinqinacademy.myhotel.api.models.enums.BedSize;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
+
 
 @Getter
 @Setter
