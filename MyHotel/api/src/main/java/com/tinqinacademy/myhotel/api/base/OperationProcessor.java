@@ -1,6 +1,6 @@
 package com.tinqinacademy.myhotel.api.base;
 
-import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
+import com.tinqinacademy.myhotel.api.models.errors.ErrorWrapper;
 import io.vavr.control.Either;
 
 

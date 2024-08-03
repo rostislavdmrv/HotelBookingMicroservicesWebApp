@@ -1,8 +1,8 @@
 package com.tinqinacademy.myhotel.core.processors.authentication;
 
-import com.tinqinacademy.myhotel.api.errors.ErrorHandler;
+import com.tinqinacademy.myhotel.core.errorhandler.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.EmailAlreadyExistsException;
-import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
+import com.tinqinacademy.myhotel.api.models.errors.ErrorWrapper;
 import com.tinqinacademy.myhotel.api.operations.singup.SignUpInput;
 import com.tinqinacademy.myhotel.api.operations.singup.SignUpOperation;
 import com.tinqinacademy.myhotel.api.operations.singup.SignUpOutput;

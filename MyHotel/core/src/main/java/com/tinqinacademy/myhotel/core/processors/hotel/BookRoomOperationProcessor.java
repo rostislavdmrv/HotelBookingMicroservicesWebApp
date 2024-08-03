@@ -1,11 +1,11 @@
 package com.tinqinacademy.myhotel.core.processors.hotel;
 
-import com.tinqinacademy.myhotel.api.errors.ErrorHandler;
+import com.tinqinacademy.myhotel.core.errorhandler.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.NotAvailableException;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
 import com.tinqinacademy.myhotel.api.exceptions.UserNotFoundException;
 import com.tinqinacademy.myhotel.api.exceptions.messages.Messages;
-import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
+import com.tinqinacademy.myhotel.api.models.errors.ErrorWrapper;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomInput;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomOperation;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomOutput;

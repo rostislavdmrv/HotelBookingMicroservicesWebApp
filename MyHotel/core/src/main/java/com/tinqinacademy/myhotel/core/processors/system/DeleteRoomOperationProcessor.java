@@ -1,8 +1,8 @@
 package com.tinqinacademy.myhotel.core.processors.system;
 
-import com.tinqinacademy.myhotel.api.errors.ErrorHandler;
+import com.tinqinacademy.myhotel.core.errorhandler.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
-import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
+import com.tinqinacademy.myhotel.api.models.errors.ErrorWrapper;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomInput;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomOperation;
 import com.tinqinacademy.myhotel.api.operations.deletesroomsbyadmin.DeleteRoomOutput;
