@@ -24,16 +24,17 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class IsRoomFreeFreeOperationProcessor extends BaseOperationProcessor implements IsRoomFreeOperation {
+public class IsRoomFreeFreeOperationProcessor extends BaseOperationProcessor<RoomInput,RoomOutput> implements IsRoomFreeOperation {
 
     private final RoomRepository roomRepository;
     private final ErrorHandler errorHandler;
 
-    protected IsRoomFreeFreeOperationProcessor(ConversionService conversionService, Validator validator, RoomRepository roomRepository, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+    protected IsRoomFreeFreeOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, RoomRepository roomRepository, ErrorHandler errorHandler1) {
+        super(conversionService, validator, errorHandler);
         this.roomRepository = roomRepository;
-        this.errorHandler = errorHandler;
+        this.errorHandler = errorHandler1;
     }
+
 
     @Override
     public Either<ErrorWrapper, RoomOutput> process(RoomInput input) {

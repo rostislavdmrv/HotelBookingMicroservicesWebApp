@@ -26,19 +26,20 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-public class RegisterVisitorOperationProcessor extends BaseOperationProcessor implements RegisterVisitorOperation {
+public class RegisterVisitorOperationProcessor extends BaseOperationProcessor<RegisterVisitorInput,RegisterVisitorOutput> implements RegisterVisitorOperation {
     private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
     private final GuestRepository guestRepository;
     private final ErrorHandler errorHandler;
 
-    protected RegisterVisitorOperationProcessor(ConversionService conversionService, Validator validator, RoomRepository roomRepository, ReservationRepository reservationRepository, GuestRepository guestRepository, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+    protected RegisterVisitorOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, RoomRepository roomRepository, ReservationRepository reservationRepository, GuestRepository guestRepository, ErrorHandler errorHandler1) {
+        super(conversionService, validator, errorHandler);
         this.roomRepository = roomRepository;
         this.reservationRepository = reservationRepository;
         this.guestRepository = guestRepository;
-        this.errorHandler = errorHandler;
+        this.errorHandler = errorHandler1;
     }
+
 
     @Override
     public Either<ErrorWrapper, RegisterVisitorOutput> process(RegisterVisitorInput input) {

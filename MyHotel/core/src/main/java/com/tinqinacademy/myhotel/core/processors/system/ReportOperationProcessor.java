@@ -27,19 +27,19 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class ReportOperationProcessor extends BaseOperationProcessor implements ReportOperation {
+public class ReportOperationProcessor extends BaseOperationProcessor<ReportInput,ReportOutput> implements ReportOperation {
 
     private final ReservationRepository reservationRepository;
     private final GuestRepository guestRepository;
     private final RoomRepository roomRepository;
     private final ErrorHandler errorHandler;
 
-    protected ReportOperationProcessor(ConversionService conversionService, Validator validator, ReservationRepository reservationRepository, GuestRepository guestRepository, RoomRepository roomRepository, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+    protected ReportOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, ReservationRepository reservationRepository, GuestRepository guestRepository, RoomRepository roomRepository, ErrorHandler errorHandler1) {
+        super(conversionService, validator, errorHandler);
         this.reservationRepository = reservationRepository;
         this.guestRepository = guestRepository;
         this.roomRepository = roomRepository;
-        this.errorHandler = errorHandler;
+        this.errorHandler = errorHandler1;
     }
 
 

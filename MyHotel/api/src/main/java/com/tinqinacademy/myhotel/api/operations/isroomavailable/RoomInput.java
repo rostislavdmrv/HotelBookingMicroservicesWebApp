@@ -1,6 +1,8 @@
 package com.tinqinacademy.myhotel.api.operations.isroomavailable;
 
 import com.tinqinacademy.myhotel.api.base.OperationInput;
+import com.tinqinacademy.myhotel.api.validations.bathroomtype.BathroomTypeValidation;
+import com.tinqinacademy.myhotel.api.validations.bedsize.BedSizeValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -34,15 +36,13 @@ public class RoomInput implements OperationInput {
     private Integer bedCount;
 
     @Schema(example = "private")
-    @NotBlank(message = "Bathroom type cannot be blank")
     @Size(min= 3,max = 10, message = "Bathroom type cannot exceed 10 characters")
+    @BathroomTypeValidation(message = "Bathroom type cannot be blank")
     private String bathroomType;
 
     @Schema(example = "kingSized")
-    @NotBlank(message = "Bed size cannot be blank")
     @Size(min =3, max = 10, message = "Bed size cannot exceed 10 characters")
+    @BedSizeValidation(message = "Bed size cannot be blank")
     private String bedSize;
-
-
 
 }

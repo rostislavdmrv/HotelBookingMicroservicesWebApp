@@ -27,18 +27,19 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-public class UpdateRoomOperationProcessor extends BaseOperationProcessor implements UpdateRoomOperation {
+public class UpdateRoomOperationProcessor extends BaseOperationProcessor<UpdateRoomInput,UpdateRoomOutput> implements UpdateRoomOperation {
 
     private final RoomRepository roomRepository;
     private final BedRepository bedRepository;
     private final ErrorHandler errorHandler;
 
-    protected UpdateRoomOperationProcessor(ConversionService conversionService, Validator validator, RoomRepository roomRepository, BedRepository bedRepository, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+    protected UpdateRoomOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, RoomRepository roomRepository, BedRepository bedRepository, ErrorHandler errorHandler1) {
+        super(conversionService, validator, errorHandler);
         this.roomRepository = roomRepository;
         this.bedRepository = bedRepository;
-        this.errorHandler = errorHandler;
+        this.errorHandler = errorHandler1;
     }
+
 
     @Override
     public Either<ErrorWrapper, UpdateRoomOutput> process(UpdateRoomInput input) {

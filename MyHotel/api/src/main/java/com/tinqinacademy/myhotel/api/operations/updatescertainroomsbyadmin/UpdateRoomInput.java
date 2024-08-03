@@ -3,6 +3,7 @@ package com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tinqinacademy.myhotel.api.base.OperationInput;
+import com.tinqinacademy.myhotel.api.validations.bathroomtype.BathroomTypeValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -20,16 +21,14 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 public class UpdateRoomInput  implements OperationInput {
 
-    
     @JsonIgnore
     private String roomId;
-
 
     private List<String> beds;
 
     @Schema(example = "private")
-    @NotBlank(message = "Bathroom type cannot be blank")
-    @Size(min = 5, max = 30, message = "Bathroom type cannot exceed 30 characters")
+    @Size(min = 5, max = 20, message = "Bathroom type cannot exceed 20 characters")
+    @BathroomTypeValidation(message = "Bathroom type cannot be blank")
     private String bathroomType;
 
     @Schema(example = "1")

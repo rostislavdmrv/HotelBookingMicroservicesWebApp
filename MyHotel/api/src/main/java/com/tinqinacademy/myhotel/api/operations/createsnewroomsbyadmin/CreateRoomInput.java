@@ -1,13 +1,10 @@
 package com.tinqinacademy.myhotel.api.operations.createsnewroomsbyadmin;
 
-
-
 import com.tinqinacademy.myhotel.api.base.OperationInput;
 import com.tinqinacademy.myhotel.api.validations.bathroomtype.BathroomTypeValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,9 +19,8 @@ public class CreateRoomInput implements OperationInput {
     private List<String> beds;
 
     @Schema(example = "private")
-    @NotBlank(message = "Bathroom type cannot be blank")
-    @Size(min = 5, max = 30, message = "Bathroom type cannot exceed 30 characters")
-    @BathroomTypeValidation
+    @Size(min = 5, max = 20, message = "Bathroom type cannot exceed 20 characters")
+    @BathroomTypeValidation(message = "Bathroom type cannot be blank")
     private String bathroomType;
 
 

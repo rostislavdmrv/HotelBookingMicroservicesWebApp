@@ -18,15 +18,16 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-public class DeleteRoomOperationProcessor extends BaseOperationProcessor implements DeleteRoomOperation {
+public class DeleteRoomOperationProcessor extends BaseOperationProcessor<DeleteRoomInput,DeleteRoomOutput> implements DeleteRoomOperation {
     private final RoomRepository roomRepository;
     private final ErrorHandler errorHandler;
 
-    protected DeleteRoomOperationProcessor(ConversionService conversionService, Validator validator, RoomRepository roomRepository, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+    protected DeleteRoomOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, RoomRepository roomRepository, ErrorHandler errorHandler1) {
+        super(conversionService, validator, errorHandler);
         this.roomRepository = roomRepository;
-        this.errorHandler = errorHandler;
+        this.errorHandler = errorHandler1;
     }
+
 
     @Override
     public Either<ErrorWrapper, DeleteRoomOutput> process(DeleteRoomInput input) {
