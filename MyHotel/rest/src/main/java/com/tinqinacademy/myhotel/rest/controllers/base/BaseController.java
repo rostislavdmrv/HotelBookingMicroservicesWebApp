@@ -1,7 +1,7 @@
 package com.tinqinacademy.myhotel.rest.controllers.base;
 
 import com.tinqinacademy.myhotel.api.base.OperationOutput;
-import com.tinqinacademy.myhotel.api.models.error.ErrorWrapper;
+import com.tinqinacademy.myhotel.api.models.errors.ErrorWrapper;
 import io.vavr.control.Either;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
