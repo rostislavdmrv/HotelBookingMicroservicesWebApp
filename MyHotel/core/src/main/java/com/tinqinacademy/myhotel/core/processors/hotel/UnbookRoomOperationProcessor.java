@@ -1,6 +1,4 @@
 package com.tinqinacademy.myhotel.core.processors.hotel;
-
-
 import com.tinqinacademy.myhotel.core.errorhandler.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
 import com.tinqinacademy.myhotel.api.models.errors.ErrorWrapper;
@@ -10,32 +8,27 @@ import com.tinqinacademy.myhotel.api.operations.removesroomreservation.UnbookRoo
 import com.tinqinacademy.myhotel.core.processors.base.BaseOperationProcessor;
 import com.tinqinacademy.myhotel.persistence.models.entities.Reservation;
 import com.tinqinacademy.myhotel.persistence.repositories.ReservationRepository;
-import com.tinqinacademy.myhotel.persistence.repositories.RoomRepository;
-import com.tinqinacademy.myhotel.persistence.repositories.UserRepository;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
-
 import java.util.UUID;
 
 @Service
 @Slf4j
-public class UnbookRoomOperationProcessor extends BaseOperationProcessor implements UnbookRoomOperation {
+public class UnbookRoomOperationProcessor extends BaseOperationProcessor<UnbookRoomInput,UnbookRoomOutput> implements UnbookRoomOperation {
     private final ReservationRepository reservationRepository;
     private final ErrorHandler errorHandler;
-    private final RoomRepository roomRepository;
-    private final UserRepository userRepository;
 
-    protected UnbookRoomOperationProcessor(ConversionService conversionService, Validator validator, ReservationRepository reservationRepository, ErrorHandler errorHandler, RoomRepository roomRepository, UserRepository userRepository) {
-        super(conversionService, validator);
+
+    protected UnbookRoomOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, ReservationRepository reservationRepository, ErrorHandler errorHandler1) {
+        super(conversionService, validator, errorHandler);
         this.reservationRepository = reservationRepository;
-        this.errorHandler = errorHandler;
-        this.roomRepository = roomRepository;
-        this.userRepository = userRepository;
+        this.errorHandler = errorHandler1;
     }
+
 
     @Override
     public Either<ErrorWrapper, UnbookRoomOutput> process(UnbookRoomInput input) {

@@ -34,20 +34,21 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-public class BookRoomOperationProcessor extends BaseOperationProcessor implements BookRoomOperation {
+public class BookRoomOperationProcessor extends BaseOperationProcessor<BookRoomInput,BookRoomOutput> implements BookRoomOperation {
 
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final ErrorHandler errorHandler;
 
-    protected BookRoomOperationProcessor(ConversionService conversionService, Validator validator, ReservationRepository reservationRepository, RoomRepository roomRepository, UserRepository userRepository, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+    protected BookRoomOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, ReservationRepository reservationRepository, RoomRepository roomRepository, UserRepository userRepository, ErrorHandler errorHandler1) {
+        super(conversionService, validator, errorHandler);
         this.reservationRepository = reservationRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
-        this.errorHandler = errorHandler;
+        this.errorHandler = errorHandler1;
     }
+
 
     @Override
     public Either<ErrorWrapper, BookRoomOutput> process(BookRoomInput input) {

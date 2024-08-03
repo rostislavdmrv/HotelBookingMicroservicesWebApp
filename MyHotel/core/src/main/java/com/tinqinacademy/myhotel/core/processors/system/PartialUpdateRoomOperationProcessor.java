@@ -2,8 +2,6 @@ package com.tinqinacademy.myhotel.core.processors.system;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.tinqinacademy.myhotel.core.errorhandler.ErrorHandler;
@@ -26,27 +24,26 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
-public class PartialUpdateRoomOperationProcessor extends BaseOperationProcessor implements PartialUpdateRoomOperation {
+public class PartialUpdateRoomOperationProcessor extends BaseOperationProcessor<PartialUpdateRoomInput,PartialUpdateRoomOutput> implements PartialUpdateRoomOperation {
 
     private final RoomRepository roomRepository;
     private final BedRepository bedRepository;
     private final ObjectMapper objectMapper;
-    private final ErrorHandler errorHandler;
 
-    protected PartialUpdateRoomOperationProcessor(ConversionService conversionService, Validator validator, RoomRepository roomRepository, BedRepository bedRepository, ObjectMapper objectMapper, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+    protected PartialUpdateRoomOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, RoomRepository roomRepository, BedRepository bedRepository, ObjectMapper objectMapper) {
+        super(conversionService, validator, errorHandler);
         this.roomRepository = roomRepository;
         this.bedRepository = bedRepository;
         this.objectMapper = objectMapper;
-        this.errorHandler = errorHandler;
-
     }
+
 
     @Override
     public Either<ErrorWrapper, PartialUpdateRoomOutput> process(PartialUpdateRoomInput input) {
@@ -57,10 +54,13 @@ public class PartialUpdateRoomOperationProcessor extends BaseOperationProcessor 
                     UUID roomId = UUID.fromString(input.getRoomId());
                     Room room = findRoomById(roomId);
 
-                    if (input.getBeds() != null) {
-                        updateBedsInInputNode(input);
+                    Room converted = conversionService.convert(input, Room.class);
+
+                    if (input.getBeds() != null && !input.getBeds().isEmpty()) {
+                        List<Bed> roomBeds = convertBedSizesToBeds(input.getBeds());
+                        converted.setBeds(roomBeds);
                     }
-                    Room patchedRoom = applyPatchToRoom(input, room);
+                    Room patchedRoom = applyPatchToRoom(converted, room);
                     roomRepository.save(patchedRoom);
                     PartialUpdateRoomOutput output = convertToOutput(patchedRoom);
                     log.info("End: Successfully partially updated room with ID {}", output.getRoomId());
@@ -76,29 +76,23 @@ public class PartialUpdateRoomOperationProcessor extends BaseOperationProcessor 
                 .orElseThrow(() -> new ResourceNotFoundException("Room", "roomId", roomId.toString()));
     }
 
-    private void updateBedsInInputNode(PartialUpdateRoomInput input) {
-        JsonNode inputNode = objectMapper.valueToTree(input);
-        ArrayNode bedsArrayNode = (ArrayNode) inputNode.get("beds");
-
-        if (bedsArrayNode != null) {
-            List<Bed> beds = bedsArrayNode.findValuesAsText("").stream()
-                    .map(this::findOrCreateBed)
-                    .collect(Collectors.toList());
-
-            ArrayNode updatedBedsNode = objectMapper.createArrayNode();
-            beds.forEach(bed -> updatedBedsNode.add(objectMapper.valueToTree(bed)));
-
-            ((ObjectNode) inputNode).set("beds", updatedBedsNode);
+    private List<Bed> convertBedSizesToBeds(List<String> bedSizes) {
+        List<Bed> roomBeds = new ArrayList<>();
+        for (String size : bedSizes) {
+            Bed bed = findBedBySize(size);
+            roomBeds.add(bed);
         }
+        return roomBeds;
     }
-    private Bed findOrCreateBed(String bedSize) {
-        return bedRepository.findByBedSize(BedSize.getFromCode(bedSize))
-                .orElse(new Bed(UUID.randomUUID(),BedSize.getFromCode(bedSize), 2, null, null)); // Примерни стойности
+    private Bed findBedBySize(String bed) {
+        BedSize bedSize = BedSize.valueOf(bed.toUpperCase());
+        return bedRepository.findByBedSize(bedSize)
+                .orElseThrow(() -> new ResourceNotFoundException("Bed", "bedSize", bedSize.toString()));
     }
 
-    private Room applyPatchToRoom(PartialUpdateRoomInput input, Room room) {
-        JsonNode roomNode = objectMapper.valueToTree(room);
+    private Room applyPatchToRoom(Room input, Room room) {
         JsonNode inputNode = objectMapper.valueToTree(input);
+        JsonNode roomNode = objectMapper.valueToTree(room);
 
         try {
             JsonMergePatch patch = JsonMergePatch.fromJson(inputNode);

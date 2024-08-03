@@ -3,11 +3,12 @@ package com.tinqinacademy.myhotel.api.validations.bedsize;
 import com.tinqinacademy.myhotel.api.models.enums.BedSize;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
+import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component
 public class BedSizeValidator implements ConstraintValidator<BedSizeValidation, String> {
     private static final Set<String> VALID_BED_SIZES = EnumSet.allOf(BedSize.class).stream()
             .map(BedSize::getCode)

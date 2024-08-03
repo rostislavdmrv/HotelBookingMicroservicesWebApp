@@ -12,4 +12,5 @@ import java.util.UUID;
 @Repository
 public interface BedRepository extends JpaRepository<Bed, UUID> {
     Optional<Bed> findByBedSize(BedSize bedSize);
+
 }

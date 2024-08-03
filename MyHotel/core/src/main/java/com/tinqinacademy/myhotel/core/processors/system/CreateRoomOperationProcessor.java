@@ -29,18 +29,19 @@ import java.util.Objects;
 @Service
 
 @Slf4j
-public class CreateRoomOperationProcessor extends BaseOperationProcessor implements CreateRoomOperation {
+public class CreateRoomOperationProcessor extends BaseOperationProcessor<CreateRoomInput,CreateRoomOutput> implements CreateRoomOperation {
 
     private final RoomRepository roomRepository;
     private final BedRepository bedRepository;
     private final ErrorHandler errorHandler;
 
-    protected CreateRoomOperationProcessor(ConversionService conversionService, Validator validator, RoomRepository roomRepository, BedRepository bedRepository, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+    protected CreateRoomOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, RoomRepository roomRepository, BedRepository bedRepository, ErrorHandler errorHandler1) {
+        super(conversionService, validator, errorHandler);
         this.roomRepository = roomRepository;
         this.bedRepository = bedRepository;
-        this.errorHandler = errorHandler;
+        this.errorHandler = errorHandler1;
     }
+
 
     @Override
     public Either<ErrorWrapper, CreateRoomOutput> process(CreateRoomInput input) {
