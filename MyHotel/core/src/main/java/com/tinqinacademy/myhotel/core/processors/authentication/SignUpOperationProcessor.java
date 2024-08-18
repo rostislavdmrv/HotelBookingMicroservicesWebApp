@@ -23,14 +23,15 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Slf4j
-public class SignUpOperationProcessor extends BaseOperationProcessor implements SignUpOperation {
+public class SignUpOperationProcessor extends BaseOperationProcessor<SignUpInput,SignUpOutput> implements SignUpOperation {
     private final UserRepository userRepository;
-    private final ErrorHandler errorHandler;
-    protected SignUpOperationProcessor(ConversionService conversionService, Validator validator, UserRepository userRepository, ErrorHandler errorHandler) {
-        super(conversionService, validator);
+
+
+    protected SignUpOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, UserRepository userRepository) {
+        super(conversionService, validator, errorHandler);
         this.userRepository = userRepository;
-        this.errorHandler = errorHandler;
     }
+
 
     @Override
     public Either<ErrorWrapper, SignUpOutput> process(SignUpInput input) {

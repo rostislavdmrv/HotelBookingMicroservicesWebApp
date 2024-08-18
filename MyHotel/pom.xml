@@ -21,7 +21,20 @@
         <module>api</module>
         <module>core</module>
         <module>persistence</module>
+        <module>restexport</module>
+
     </modules>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <packaging>pom</packaging>
 
@@ -31,6 +44,10 @@
         <java.version>21</java.version>
         <jackson.version>2.16.0</jackson.version>
         <swagger.version>2.6.0</swagger.version>
+        <vavr.version>0.10.4</vavr.version>
+        <admin.version>3.0.0</admin.version>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <flattenpomversion>1.2.7</flattenpomversion>
     </properties>
 
 
@@ -87,8 +104,20 @@
         <dependency>
             <groupId>io.vavr</groupId>
             <artifactId>vavr</artifactId>
-            <version>0.10.4</version>
+            <version>${vavr.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-client</artifactId>
+            <version>${admin.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
     </dependencies>
 
 
@@ -97,7 +126,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.2.7</version> <!-- Use the latest version -->
+                <version>${flattenpomversion}</version>
                 <executions>
                     <execution>
                         <goals>

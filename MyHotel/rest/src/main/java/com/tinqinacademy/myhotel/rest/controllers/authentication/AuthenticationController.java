@@ -2,7 +2,7 @@ package com.tinqinacademy.myhotel.rest.controllers.authentication;
 import com.tinqinacademy.myhotel.api.operations.singup.SignUpInput;
 import com.tinqinacademy.myhotel.api.operations.singup.SignUpOperation;
 import com.tinqinacademy.myhotel.rest.controllers.base.BaseController;
-import com.tinqinacademy.myhotel.rest.restapiroutes.RestApiRoutes;
+import com.tinqinacademy.myhotel.api.restapiroutes.RestApiRoutes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
