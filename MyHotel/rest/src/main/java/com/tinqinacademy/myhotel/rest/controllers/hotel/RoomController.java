@@ -10,7 +10,7 @@ import com.tinqinacademy.myhotel.api.operations.removesroomreservation.UnbookRoo
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomInput;
 import com.tinqinacademy.myhotel.api.operations.returnsbasicinfoforroom.BasicInfoRoomOperation;
 import com.tinqinacademy.myhotel.rest.controllers.base.BaseController;
-import com.tinqinacademy.myhotel.rest.restapiroutes.RestApiRoutes;
+import com.tinqinacademy.myhotel.api.restapiroutes.RestApiRoutes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

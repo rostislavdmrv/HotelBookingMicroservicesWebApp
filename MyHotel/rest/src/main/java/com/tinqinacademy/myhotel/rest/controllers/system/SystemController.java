@@ -13,7 +13,7 @@ import com.tinqinacademy.myhotel.api.operations.updatescertainroomsbyadmin.Updat
 import com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin.PartialUpdateRoomInput;
 import com.tinqinacademy.myhotel.api.operations.updatespartialroomsbyadmin.PartialUpdateRoomOperation;
 import com.tinqinacademy.myhotel.rest.controllers.base.BaseController;
-import com.tinqinacademy.myhotel.rest.restapiroutes.RestApiRoutes;
+import com.tinqinacademy.myhotel.api.restapiroutes.RestApiRoutes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
