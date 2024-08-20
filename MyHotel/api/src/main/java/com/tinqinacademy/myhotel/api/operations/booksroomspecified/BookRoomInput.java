@@ -5,9 +5,9 @@ import com.tinqinacademy.myhotel.api.base.OperationInput;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.validator.constraints.UUID;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,7 +17,8 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 public class BookRoomInput implements OperationInput {
 
-
+    @NotBlank
+    @UUID
     @JsonIgnore
     private String roomId;
 
@@ -48,4 +49,7 @@ public class BookRoomInput implements OperationInput {
             message = "Phone number must start with a '+' followed by the country code and subscriber number digits"
     )
     private String phoneNo;
+
+    @NotBlank(message = "User id cannot be empty")
+    private String userId;
 }

@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -22,25 +23,21 @@ import java.util.Set;
 public class DataSeeder implements ApplicationRunner {
     private final BedRepository bedRepository;
     private final RoomRepository roomRepository;
-    private final UserRepository userRepository;
     private final GuestRepository guestRepository;
     private final ReservationRepository reservationRepository;
 
     @Autowired
-    public DataSeeder(BedRepository bedRepository, RoomRepository roomRepository, UserRepository userRepository, GuestRepository guestRepository, ReservationRepository reservationRepository) {
+    public DataSeeder(BedRepository bedRepository, RoomRepository roomRepository, GuestRepository guestRepository, ReservationRepository reservationRepository) {
         this.bedRepository = bedRepository;
         this.roomRepository = roomRepository;
-        this.userRepository = userRepository;
         this.guestRepository = guestRepository;
         this.reservationRepository = reservationRepository;
     }
-
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         seedBeds();
         seedRooms();
-        seedUsers();
         seedGuests();
         seedBookings();
     }
@@ -52,11 +49,9 @@ public class DataSeeder implements ApplicationRunner {
         }
 
         Bed singleBed = Bed.builder()
-                //.id(UUID.randomUUID())
                 .bedSize(BedSize.SINGLE)
                 .capacity(1)
                 .build();
-
 
         Bed smallDoubleBed = Bed.builder()
                 .bedSize(BedSize.SMALL_DOUBLE)
@@ -88,56 +83,26 @@ public class DataSeeder implements ApplicationRunner {
             return;
         }
 
-        Bed sampleBed1 = bedRepository.findAll().get(0);
-        Bed sampleBed2 = bedRepository.findAll().get(1);
-        Bed sampleBed3 = bedRepository.findAll().get(1);
+        List<Bed> beds = bedRepository.findAll();
 
         Room room1 = Room.builder()
                 .price(new BigDecimal("89.99"))
                 .roomFloor(1)
-                .roomNumber("A101")
+                .roomNumber("101A")
                 .bathroomType(BathroomType.PRIVATE)
-                .beds(List.of(sampleBed1, sampleBed2))
+                .beds(List.of(beds.get(0), beds.get(1)))
                 .build();
 
         Room room2 = Room.builder()
                 .price(new BigDecimal("60.00"))
                 .roomFloor(2)
-                .roomNumber("B227")
+                .roomNumber("27B")
                 .bathroomType(BathroomType.SHARED)
-                .beds(List.of(sampleBed3))
+                .beds(List.of(beds.get(2)))
                 .build();
 
         roomRepository.saveAll(List.of(room1, room2));
         log.info("DataSeeder - seeded rooms.");
-    }
-
-    private void seedUsers() {
-        if (userRepository.count() != 0) {
-            log.info("DataSeeder - didn't seed any users.");
-            return;
-        }
-
-        User user1 = User.builder()
-                .email("mira@gmail.com")
-                .userPassword("1236548")
-                .firstName("Mira")
-                .lastName("Ivanova")
-                .phoneNumber("+359898456532")
-                .birthdate(LocalDate.of(1990, 1, 1))
-                .build();
-
-        User user2 = User.builder()
-                .email("martinn20@mail.com")
-                .userPassword("nhj5d5")
-                .firstName("Martin")
-                .lastName("Marinov")
-                .phoneNumber("+359963147541")
-                .birthdate(LocalDate.of(2001, 5, 11))
-                .build();
-
-        userRepository.saveAll(List.of(user1, user2));
-        log.info("DataSeeder - seeded users.");
     }
 
     private void seedGuests() {
@@ -179,12 +144,11 @@ public class DataSeeder implements ApplicationRunner {
         }
 
         Room room = roomRepository.findAll().get(0);
-        User user = userRepository.findAll().get(0);
         Guest guest = guestRepository.findAll().get(0);
 
         Reservation reservation = Reservation.builder()
                 .room(room)
-                .user(user)
+                .userId(UUID.randomUUID())
                 .startDate(LocalDate.now())
                 .endDate(LocalDate.now().plusDays(3))
                 .totalPrice(new BigDecimal("350.00"))
