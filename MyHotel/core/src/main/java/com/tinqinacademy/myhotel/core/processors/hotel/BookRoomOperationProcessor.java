@@ -3,7 +3,6 @@ package com.tinqinacademy.myhotel.core.processors.hotel;
 import com.tinqinacademy.myhotel.core.errorhandler.ErrorHandler;
 import com.tinqinacademy.myhotel.api.exceptions.NotAvailableException;
 import com.tinqinacademy.myhotel.api.exceptions.ResourceNotFoundException;
-import com.tinqinacademy.myhotel.api.exceptions.UserNotFoundException;
 import com.tinqinacademy.myhotel.api.exceptions.messages.Messages;
 import com.tinqinacademy.myhotel.api.models.errors.ErrorWrapper;
 import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomInput;
@@ -12,10 +11,8 @@ import com.tinqinacademy.myhotel.api.operations.booksroomspecified.BookRoomOutpu
 import com.tinqinacademy.myhotel.core.processors.base.BaseOperationProcessor;
 import com.tinqinacademy.myhotel.persistence.models.entities.Reservation;
 import com.tinqinacademy.myhotel.persistence.models.entities.Room;
-import com.tinqinacademy.myhotel.persistence.models.entities.User;
 import com.tinqinacademy.myhotel.persistence.repositories.ReservationRepository;
 import com.tinqinacademy.myhotel.persistence.repositories.RoomRepository;
-import com.tinqinacademy.myhotel.persistence.repositories.UserRepository;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
 import jakarta.validation.Validator;
@@ -27,8 +24,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 
@@ -38,14 +33,13 @@ public class BookRoomOperationProcessor extends BaseOperationProcessor<BookRoomI
 
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
-    private final UserRepository userRepository;
+
     private final ErrorHandler errorHandler;
 
-    protected BookRoomOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, ReservationRepository reservationRepository, RoomRepository roomRepository, UserRepository userRepository, ErrorHandler errorHandler1) {
+    protected BookRoomOperationProcessor(ConversionService conversionService, Validator validator, ErrorHandler errorHandler, ReservationRepository reservationRepository, RoomRepository roomRepository,  ErrorHandler errorHandler1) {
         super(conversionService, validator, errorHandler);
         this.reservationRepository = reservationRepository;
         this.roomRepository = roomRepository;
-        this.userRepository = userRepository;
         this.errorHandler = errorHandler1;
     }
 
@@ -64,9 +58,16 @@ public class BookRoomOperationProcessor extends BaseOperationProcessor<BookRoomI
         UUID roomId = UUID.fromString(input.getRoomId());
         Room room = findRoomById(roomId);
         validateRoomAvailability(room, input.getStartDate(), input.getEndDate());
-        User user = findUser(input);
+
         BigDecimal totalPrice = calculateTotalPrice(input.getStartDate(), input.getEndDate(), room.getPrice());
-        Reservation reservation = createReservation(input, room, user, totalPrice);
+
+        Reservation reservation = conversionService.convert(input, Reservation.ReservationBuilder.class)
+                .room(room)
+                .userId(UUID.fromString(input.getUserId()))
+                .totalPrice(totalPrice)
+                .room(room)
+                .build();
+
         reservationRepository.save(reservation);
 
         BookRoomOutput output = BookRoomOutput.builder().build();
@@ -89,23 +90,12 @@ public class BookRoomOperationProcessor extends BaseOperationProcessor<BookRoomI
             throw new NotAvailableException(Messages.NOT_AVAILABLE_ROOM);
         }
     }
-    private User findUser(BookRoomInput input) {
-        return userRepository
-                .findByPhoneNumberAndFirstNameAndLastName(input.getPhoneNo(), input.getFirstName(), input.getLastName())
-                .orElseThrow(() -> new UserNotFoundException(input.getFirstName(), input.getLastName(), input.getPhoneNo()));
-    }
+
     private BigDecimal calculateTotalPrice(LocalDate startDate, LocalDate endDate, BigDecimal roomPrice) {
         long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
         return roomPrice.multiply(BigDecimal.valueOf(daysBetween));
     }
 
-    private Reservation createReservation(BookRoomInput input, Room room, User user, BigDecimal totalPrice) {
-        return Objects.requireNonNull(conversionService.convert(input, Reservation.ReservationBuilder.class))
-                .room(room)
-                .user(user)
-                .totalPrice(totalPrice)
-                .guests(Set.of())
-                .build();
-    }
+
 
 }

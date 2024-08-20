@@ -1,9 +1,20 @@
 version: '3.9'
 
-networks:
-  net1:
+#networks:
+#  net1:
 
 services:
+  rest:
+    container_name: rest
+    image: rest:0.0.1-SNAPSHOT
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/hotel-manager"
+    depends_on:
+      - db
+
+
   db:
     container_name: rostislav-hotels-db
     image: postgres:latest
@@ -16,8 +27,8 @@ services:
     volumes:
       - db-data:/var/lib/postresql/data
       - ./create_db.sh:/docker-entrypoint-initdb.d/create_db.sh
-    networks:
-      - net1
+#    networks:
+#      - net1
 
   maildev:
     container_name: maildev
@@ -28,8 +39,8 @@ services:
     ports:
       - "1080:1080"
       - "1025:1025"
-    networks:
-      - net1
+#    networks:
+#      - net1
 
 volumes:
   db-data:

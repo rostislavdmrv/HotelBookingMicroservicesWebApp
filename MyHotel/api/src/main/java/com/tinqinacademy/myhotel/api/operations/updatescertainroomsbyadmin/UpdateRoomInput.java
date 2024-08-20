@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tinqinacademy.myhotel.api.base.OperationInput;
 import com.tinqinacademy.myhotel.api.validations.bathroomtype.BathroomTypeValidation;
+import com.tinqinacademy.myhotel.api.validations.bedsize.BedSizeValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.hibernate.validator.constraints.UUID;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,8 +23,11 @@ import java.util.UUID;
 public class UpdateRoomInput  implements OperationInput {
 
     @JsonIgnore
+    @UUID
     private String roomId;
 
+    @NotNull(message = "Bed sizes cannot be null")
+    @BedSizeValidation
     private List<String> beds;
 
     @Schema(example = "private")
@@ -38,7 +42,8 @@ public class UpdateRoomInput  implements OperationInput {
 
     @Schema(example = "18A")
     @NotBlank(message = "Room number cannot be blank")
-    @Size(min = 1, max = 10, message = "Room number cannot exceed 10 characters" )
+    @Size(min = 2, max = 10, message = "Room number cannot exceed 10 characters" )
+    @Pattern(regexp = "[0-9]{1,10}[A-Z]?", message = "Valid room numbers start with numbers and could end with a letter")
     private String roomNo;
 
     @Schema(example = "89.99")

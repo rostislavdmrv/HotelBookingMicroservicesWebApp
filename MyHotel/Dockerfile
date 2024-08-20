@@ -1,4 +1,4 @@
-FROM amazoncorretto:21
+FROM amazoncorretto:21-alpine
 
 COPY rest/target/*.jar /app.jar
 
