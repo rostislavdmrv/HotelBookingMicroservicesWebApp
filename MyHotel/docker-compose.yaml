@@ -1,22 +1,12 @@
 version: '3.9'
 
-#networks:
-#  net1:
+networks:
+  net1:
 
 services:
-  rest:
-    container_name: rest
-    image: rest:0.0.1-SNAPSHOT
-    ports:
-      - 8080:8080
-    environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/hotel-manager"
-    depends_on:
-      - db
-
 
   db:
-    container_name: rostislav-hotels-db
+    container_name: rostislav-db
     image: postgres:latest
     ports:
       - 5432:5432
@@ -27,8 +17,8 @@ services:
     volumes:
       - db-data:/var/lib/postresql/data
       - ./create_db.sh:/docker-entrypoint-initdb.d/create_db.sh
-#    networks:
-#      - net1
+    networks:
+      - net1
 
   maildev:
     container_name: maildev
@@ -39,8 +29,79 @@ services:
     ports:
       - "1080:1080"
       - "1025:1025"
-#    networks:
-#      - net1
+    networks:
+      - net1
+
+  auth-service:
+    build:
+      context: C:\Users\User\RostislavProject\Authentication\Authentication
+      dockerfile: Dockerfile
+    container_name: auth-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://rostislav-db:5432/authentication
+      - SPRING_DATASOURCE_USERNAME=rostislav
+      - SPRING_DATASOURCE_PASSWORD=rostislav11
+    ports:
+      - "8070:8070"
+    depends_on:
+      - db
+    networks:
+      - net1
+
+  comments-service:
+    build:
+      context: C:\Users\User\RostislavProject\Comments\Comments
+      dockerfile: Dockerfile
+    container_name: comments-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://rostislav-db:5432/comments
+      - SPRING_DATASOURCE_USERNAME=rostislav
+      - SPRING_DATASOURCE_PASSWORD=rostislav11
+    ports:
+      - "8086:8086"
+    depends_on:
+      - db
+    networks:
+      - net1
+
+  hotel-service:
+    build:
+      context: C:\Users\User\RostislavProject\HotelBookingMicroservicesWebApp\MyHotel
+      dockerfile: Dockerfile
+    container_name: hotel-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://rostislav-db:5432/hotel-manager
+      - SPRING_DATASOURCE_USERNAME=rostislav
+      - SPRING_DATASOURCE_PASSWORD=rostislav11
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - net1
+
+  bff-service:
+    build:
+      context: C:\Users\User\RostislavProject\Backend-for-Frontend\BFF
+      dockerfile: Dockerfile
+    container_name: bff-service
+    ports:
+      - "8090:8090"
+    depends_on:
+      - hotel-service
+      - auth-service
+      - comments-service
+    networks:
+      - net1
+
+  admin-service:
+    build:
+      context: C:\Users\User\RostislavProject\SpringBootAdmin\Admin
+      dockerfile: Dockerfile
+    container_name: admin-service
+    ports:
+      - "8099:8099"
+
 
 volumes:
   db-data:
