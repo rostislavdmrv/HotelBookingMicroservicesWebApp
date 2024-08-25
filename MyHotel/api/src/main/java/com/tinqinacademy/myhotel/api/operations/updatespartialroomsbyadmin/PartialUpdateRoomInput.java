@@ -25,8 +25,7 @@ public class PartialUpdateRoomInput implements OperationInput {
     @UUID
     private String roomId;
 
-    @NotNull(message = "Bed sizes cannot be null")
-    @BedSizeValidation
+
     private List<String> beds;
 
     @Schema(example = "private")

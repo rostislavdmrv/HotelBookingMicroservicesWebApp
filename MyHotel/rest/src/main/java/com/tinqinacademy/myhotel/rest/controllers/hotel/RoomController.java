@@ -41,7 +41,9 @@ public class RoomController extends BaseController {
             @ApiResponse(responseCode = "200", description = "Room availability retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to check for available this  room"),
-            @ApiResponse(responseCode = "404", description = "Room not found")
+            @ApiResponse(responseCode = "404", description = "Room not found"),
+            @ApiResponse(responseCode = "422", description = "Validation error")
+
     })
     @GetMapping(RestApiRoutes.CHECK_AVAILABILITY)
     public ResponseEntity<?> isRoomAvailable(
@@ -70,7 +72,8 @@ public class RoomController extends BaseController {
             @ApiResponse(responseCode = "200", description = "Retrieved information successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to view this room's information"),
-            @ApiResponse(responseCode = "404", description = "Room not found")
+            @ApiResponse(responseCode = "404", description = "Room not found"),
+            @ApiResponse(responseCode = "422", description = "Validation error")
     })
     @GetMapping(RestApiRoutes.RETRIEVE_BASIC_INFO)
     public ResponseEntity<?> infoForRoom(@PathVariable String roomId) {
@@ -89,8 +92,11 @@ public class RoomController extends BaseController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully booked a room"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to book this room"),
-            @ApiResponse(responseCode = "404", description = "Room not found")
+            @ApiResponse(responseCode = "404", description = "Room not found"),
+            @ApiResponse(responseCode = "409", description = "Room already booked for the specified period"),
+            @ApiResponse(responseCode = "422", description = "Validation error")
     })
     @PostMapping(RestApiRoutes.BOOK_ROOM)
     public ResponseEntity<?> bookRoom(@PathVariable String roomId ,@RequestBody BookRoomInput input) {
@@ -108,6 +114,7 @@ public class RoomController extends BaseController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reservation removed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden: You don't have permission to cancel this reservation"),
             @ApiResponse(responseCode = "404", description = "Reservation not found")
     })
