@@ -5,14 +5,18 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Component;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class BedSizeValidator implements ConstraintValidator<BedSizeValidation, String> {
-    private static final Set<String> VALID_BED_SIZES = EnumSet.allOf(BedSize.class).stream()
-            .map(BedSize::getCode)
-            .collect(Collectors.toSet());
+public class BedSizeValidator implements ConstraintValidator<BedSizeValidation, List<String>> {
+    private static final Set<String> VALID_BED_SIZES =
+            EnumSet.allOf(BedSize.class).stream()
+                    .filter(bedSize -> bedSize != BedSize.UNKNOWN)
+                    .map(BedSize::toString)
+                    .collect(Collectors.toSet());
+
     private boolean optional;
 
     @Override
@@ -20,16 +24,22 @@ public class BedSizeValidator implements ConstraintValidator<BedSizeValidation, 
         this.optional = constraintAnnotation.optional();
     }
 
+
     @Override
-    public boolean isValid(String bedSize, ConstraintValidatorContext constraintValidatorContext) {
-        if (optional && (bedSize == null || bedSize.isEmpty())) {
+    public boolean isValid(List<String> value, ConstraintValidatorContext context) {
+        if (optional && (value == null || value.isEmpty())) {
             return true;
         }
 
-        if (bedSize == null || bedSize.isEmpty()) {
+        if (value == null || value.isEmpty()) {
             return false;
         }
 
-        return VALID_BED_SIZES.contains(bedSize);
+        for (String bedSize : value) {
+            if (!VALID_BED_SIZES.contains(bedSize)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

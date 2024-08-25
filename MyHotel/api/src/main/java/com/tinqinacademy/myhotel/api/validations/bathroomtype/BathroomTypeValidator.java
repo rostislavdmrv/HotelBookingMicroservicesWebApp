@@ -11,28 +11,30 @@ import java.util.stream.Collectors;
 
 @Component
 public class BathroomTypeValidator implements ConstraintValidator<BathroomTypeValidation, String> {
-    private static final Set<String> VALID_BATHROOM_TYPES = EnumSet.allOf(BathroomType.class).stream()
-            .map(BathroomType::getCode)
-            .collect(Collectors.toSet());
+    private static final Set<String> VALID_BATHROOM_TYPES =
+            EnumSet.allOf(BathroomType.class)
+                    .stream()
+                    .filter(bathroom -> bathroom != BathroomType.UNKNOWN)
+                    .map(BathroomType::toString)
+                    .collect(Collectors.toSet());
+
     private boolean optional;
 
     @Override
-    public void initialize(BathroomTypeValidation constraintAnnotation) {
-        this.optional = constraintAnnotation.optional();
+    public void initialize(BathroomTypeValidation bathroomTpeValidation) {
+        this.optional = bathroomTpeValidation.optional();
     }
 
     @Override
-    public boolean isValid(String bathroomType, ConstraintValidatorContext constraintValidatorContext) {
-        if (optional && (bathroomType == null || bathroomType.isEmpty())) {
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (optional && (value == null || value.isEmpty())){
             return true;
         }
 
-        if (bathroomType == null || bathroomType.isEmpty()) {
+        if (value == null || value.isEmpty()){
             return false;
         }
 
-
-
-        return VALID_BATHROOM_TYPES.contains(bathroomType);
+        return VALID_BATHROOM_TYPES.contains(value);
     }
 }

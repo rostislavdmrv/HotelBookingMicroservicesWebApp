@@ -17,7 +17,7 @@ import java.util.UUID;
 @Builder
 public class RoomInput implements OperationInput {
 
-    @NotBlank(message = "ID cannot be blank")
+
     private String id;
 
     @Schema(example = "2024-08-01")
@@ -42,7 +42,6 @@ public class RoomInput implements OperationInput {
 
     @Schema(example = "kingSized")
     @Size(min =3, max = 10, message = "Bed size cannot exceed 10 characters")
-    @BedSizeValidation(message = "Bed size cannot be blank")
     private String bedSize;
 
 }

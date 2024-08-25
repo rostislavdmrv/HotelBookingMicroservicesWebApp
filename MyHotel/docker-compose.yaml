@@ -101,6 +101,8 @@ services:
     container_name: admin-service
     ports:
       - "8099:8099"
+    networks:
+      - net1
 
 
 volumes:

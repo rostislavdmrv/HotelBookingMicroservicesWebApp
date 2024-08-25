@@ -1,6 +1,7 @@
 package com.tinqinacademy.myhotel.api.models.input;
 
 import com.tinqinacademy.myhotel.api.base.OperationInput;
+import com.tinqinacademy.myhotel.api.validations.dateofbirth.DateOfBirthValidation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -67,6 +68,7 @@ public class VisitorInput implements OperationInput {
 
     private String roomId;
 
+    @DateOfBirthValidation(message = "Guest needs to be at least 18 years old")
     private LocalDate birthdate;
 
 }
