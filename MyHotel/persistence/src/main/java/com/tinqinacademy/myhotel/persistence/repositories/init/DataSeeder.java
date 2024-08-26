@@ -54,7 +54,7 @@ public class DataSeeder implements ApplicationRunner {
                 .build();
 
         Bed smallDoubleBed = Bed.builder()
-                .bedSize(BedSize.SMALL_DOUBLE)
+                .bedSize(BedSize.SMALLDOUBLE)
                 .capacity(2)
                 .build();
 
@@ -64,12 +64,12 @@ public class DataSeeder implements ApplicationRunner {
                 .build();
 
         Bed kingSizeBed = Bed.builder()
-                .bedSize(BedSize.KING_SIZE)
+                .bedSize(BedSize.KINGSIZE)
                 .capacity(2)
                 .build();
 
         Bed queenSizeBed = Bed.builder()
-                .bedSize(BedSize.QUEEN_SIZE)
+                .bedSize(BedSize.QUEENSIZE)
                 .capacity(2)
                 .build();
 
