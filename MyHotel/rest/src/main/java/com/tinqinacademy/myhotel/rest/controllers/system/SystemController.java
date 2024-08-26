@@ -102,7 +102,7 @@ public class SystemController extends BaseController {
     @PostMapping(RestApiRoutes.CREATE_ROOM)
     public ResponseEntity<?> createNewRoomInSystem(@RequestBody CreateRoomInput input) {
 
-        return handle(createRoomOperation.process(input));
+        return handleWithStatus(createRoomOperation.process(input),HttpStatus.CREATED);
     }
 
     @Operation(summary = "Updates a room with the provided details",
@@ -150,7 +150,7 @@ public class SystemController extends BaseController {
                 .roomId(roomId)
                 .build();
 
-        return handle(deleteRoomOperation.process(roomForDelete));
+       return handleWithStatus(deleteRoomOperation.process(roomForDelete),HttpStatus.OK);
 
     }
 }
